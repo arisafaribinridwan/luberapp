@@ -13,11 +13,13 @@ Semua pengguna wajib melewati alur berikut:
 1. Pengguna membuka alamat website.
 2. Aplikasi menampilkan **splash screen** untuk memuat konfigurasi dan memeriksa session.
 3. Jika session aktif dan belum idle selama 1 jam, aplikasi membuka launchpad di `/`.
-4. Jika tidak ada session atau session sudah kedaluwarsa, aplikasi menampilkan **login screen**.
-5. Setelah login berhasil, pengguna diarahkan ke **launchpad di `/`**.
-6. Setelah 1 jam tanpa aktivitas, session dihapus/dianggap kedaluwarsa dan pengguna dikembalikan ke login screen.
+4. Jika tidak ada session atau session sudah kedaluwarsa, aplikasi menampilkan **welcome screen di `/`**.
+5. Tombol **Get Started** di welcome screen membuka login screen; setelah login berhasil, pengguna diarahkan ke **launchpad di `/`**.
+6. Setelah 1 jam tanpa aktivitas, session dihapus/dianggap kedaluwarsa dan pengguna dikembalikan ke welcome screen.
 
-Tidak ada launchpad, dashboard, data, atau operasi aplikasi yang dapat diakses sebelum login. Saat offline, PWA hanya menampilkan shell atau halaman cache yang aman; pembacaan data terbaru dan seluruh operasi transaksi tetap memerlukan koneksi serta session aktif.
+Login memakai email dan password untuk semua role. Pendaftaran mandiri tidak tersedia: admin membuat akun di panel pengguna dan menetapkan password. Pengguna yang lupa password perlu menghubungi admin.
+
+Tidak ada launchpad, dashboard, data, atau operasi aplikasi yang dapat diakses sebelum login. Welcome screen dapat diakses tanpa session. Saat offline, PWA hanya menampilkan shell atau halaman cache yang aman; pembacaan data terbaru dan seluruh operasi transaksi tetap memerlukan koneksi serta session aktif.
 
 ### 1.1 Role-Based Navigation
 
@@ -66,7 +68,7 @@ Admin dapat memfilter berdasarkan rentang tanggal, jenis kejadian, atau pelaku. 
 
 #### Operasi Input Lainnya
 
-1. **Username Authentication**: Login seluruh role (`member`, `pengurus`, `admin`) dikelola via `@nuxtjs/better-auth` menggunakan plugin `username` + password/PIN. Server memeriksa role pada setiap operasi.
+1. **Email Authentication**: Login seluruh role (`member`, `pengurus`, `admin`) dikelola via `@nuxtjs/better-auth` menggunakan email dan password. Server memeriksa role pada setiap operasi. Pembuatan akun hanya dilakukan admin melalui panel pengguna.
 2. **Auto-complete Search Member**:
 * Input text field pencarian anggota yang secara dinamis memfilter nama atau ID anggota saat pengurus/admin mengetik (misal: "Dewo" atau "MBR-001").
 * Pilihan menyimpan `memberId` murni di latar belakang.

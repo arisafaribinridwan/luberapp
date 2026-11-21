@@ -9,7 +9,7 @@
 - [design_guideline.md](design_guideline.md)
 - [nuxt-better-auth-libsql-drizzle-guide.md](nuxt-better-auth-libsql-drizzle-guide.md)
 
-**Status:** Task 1 selesai; hasil audit ada di [task-1-baseline.md](task-1-baseline.md)
+**Status:** Task 1 dan Task 2 selesai; hasil audit awal ada di [task-1-baseline.md](task-1-baseline.md)
 
 **Task list target:** Checklist dalam dokumen ini menjadi daftar kerja utama untuk implementasi aplikasi.
 
@@ -22,7 +22,7 @@ Kondisi kode saat ini masih berupa starter Nuxt UI dengan konfigurasi Better Aut
 ## Keputusan arsitektur
 
 - Gunakan Nuxt 4, Vue Composition API dengan `<script setup lang="ts">`, Nuxt UI, TypeScript strict, Zod, Drizzle ORM, SQLite lokal, dan Turso LibSQL di production.
-- Semua halaman dan endpoint aplikasi memerlukan session Better Auth; endpoint login adalah pengecualian.
+- Semua halaman fitur dan endpoint data aplikasi memerlukan session Better Auth; welcome screen dan halaman autentikasi dapat diakses tanpa session.
 - Role terpusat sebagai `member`, `pengurus`, dan `admin`. Pemeriksaan role dilakukan di server menggunakan helper bersama; route rules hanya membantu UX.
 - Gunakan struktur modular `server/database/schema/` dan satu export `databaseSchema` serta relations terpusat.
 - Pisahkan layer API route, service, dan repository. Route tidak berisi aturan bisnis atau query Drizzle yang kompleks.
@@ -91,19 +91,21 @@ Audit baseline dan kontrak aplikasi
 
 ### Task 2: Implementasi Better Auth, role, redirect, dan idle timeout
 
-**Description:** Selaraskan konfigurasi server/client Better Auth dengan tiga role, default role, launchpad `/`, login, register, two-factor, dan session idle timeout satu jam. Tambahkan helper role untuk server dan client agar pemeriksaan tidak tersebar.
+**Description:** Selaraskan konfigurasi server/client Better Auth dengan tiga role, default role, launchpad `/`, login email/password, pembuatan akun oleh admin, two-factor, dan session idle timeout satu jam. Tambahkan helper role untuk server dan client agar pemeriksaan tidak tersebar.
 
 **Acceptance criteria:**
 
-- [ ] Role `member`, `pengurus`, dan `admin` didefinisikan sekali dan dipakai server, client, serta CLI auth.
-- [ ] Semua route aplikasi mengarahkan guest ke login; login berhasil mengarah ke `/`; halaman admin dan fitur pengurus memakai role guard.
-- [ ] Session berakhir setelah satu jam tanpa aktivitas dan user diarahkan ke login.
-- [ ] Server menolak request tanpa session atau dengan role yang tidak sesuai.
+- [x] Role `member`, `pengurus`, dan `admin` didefinisikan sekali dan dipakai server, client, serta CLI auth.
+- [x] Route terlindungi mengarahkan guest ke welcome screen `/`; login berhasil mengarah ke `/`; halaman admin dan fitur pengurus memakai role guard.
+- [x] Session berakhir setelah satu jam tanpa aktivitas dan user diarahkan ke welcome screen.
+- [x] Server menolak request tanpa session atau dengan role yang tidak sesuai.
+- [x] Signup publik ditolak oleh server; hanya admin dapat membuat akun dan menetapkan password.
 
 **Verification:**
 
-- [ ] Uji login, logout, register, user per role, role tidak sesuai, session expired, dan akses API langsung.
-- [ ] Jalankan build/typecheck.
+- [x] Uji login, logout, user per role, role tidak sesuai, session expired, dan akses API langsung.
+- [ ] Uji penolakan signup publik dan pembuatan akun oleh admin.
+- [x] Jalankan build/typecheck.
 
 **Dependencies:** Task 1
 
@@ -111,9 +113,9 @@ Audit baseline dan kontrak aplikasi
 
 **Estimated scope:** Medium (3-5 files)
 
-### Task 3: Bangun splash screen, launchpad, dan application shell
+### Task 3: Bangun welcome screen, launchpad, dan application shell
 
-**Description:** Ganti halaman starter dengan alur splash → pemeriksaan session → login atau launchpad. Buat shell navigasi mobile-first dengan menu berbeda berdasarkan role dan tautan kembali ke launchpad dari setiap area.
+**Description:** Ganti halaman starter dengan alur pemeriksaan session → welcome screen atau launchpad. Tombol Get Started membuka login. Buat shell navigasi mobile-first dengan menu berbeda berdasarkan role dan tautan kembali ke launchpad dari setiap area.
 
 **Acceptance criteria:**
 
@@ -406,9 +408,9 @@ Audit baseline dan kontrak aplikasi
 
 **Estimated scope:** Large (5+ files; pecah per endpoint)
 
-### Task 15: Implementasi login/register/2FA dan launchpad UI final
+### Task 15: Implementasi login, manajemen akun admin, 2FA, dan launchpad UI final
 
-**Description:** Selesaikan halaman auth berdasarkan flow, termasuk login semua role, register sesuai kebijakan, challenge/setup 2FA, logout, session expired, dan launchpad dengan menu role-aware.
+**Description:** Selesaikan halaman auth berdasarkan flow, termasuk login email/password untuk semua role, pembuatan akun hanya dari panel admin, bantuan password melalui admin, challenge/setup 2FA, logout, session expired, dan launchpad dengan menu role-aware.
 
 **Acceptance criteria:**
 
@@ -416,6 +418,7 @@ Audit baseline dan kontrak aplikasi
 - [ ] 2FA setup, challenge, backup code, dan trust device mengikuti kemampuan Better Auth yang dipakai.
 - [ ] Launchpad menampilkan tautan hanya untuk role yang berhak.
 - [ ] Error auth dan expired session memiliki pesan yang dapat dipahami.
+- [x] Signup publik ditolak dan admin dapat membuat akun dengan password.
 
 **Verification:**
 
@@ -424,7 +427,7 @@ Audit baseline dan kontrak aplikasi
 
 **Dependencies:** Tasks 2-4
 
-**Files likely touched:** `app/pages/login.vue`, `app/pages/register.vue`, `app/pages/two-factor.vue`, `app/pages/index.vue`, `app/pages/app/security.vue`, `app/components/AppShell.vue`
+**Files likely touched:** `app/pages/login.vue`, `app/pages/admin/users.vue`, `app/pages/two-factor.vue`, `app/pages/index.vue`, `app/components/AppShell.vue`
 
 **Estimated scope:** Medium (3-5 files)
 
@@ -605,7 +608,7 @@ Audit baseline dan kontrak aplikasi
 
 ## Pertanyaan terbuka
 
-- [ ] Apakah semua pendaftar baru boleh memilih `member`, atau role awal selalu `member` dan hanya admin yang dapat menaikkan ke `pengurus`?
+- [x] Akun hanya dibuat admin; admin menetapkan role saat membuat akun, dengan default `member`.
 - [ ] Apakah pengurus boleh mencatat seluruh transaksi operasional atau harus dibatasi berdasarkan tipe transaksi tertentu?
 - [ ] Apakah nomor rekening lengkap boleh ditampilkan kepada member, atau harus disamarkan pada dashboard/feed?
 - [ ] Apakah batas ukuran dan tipe file bukti perlu ditetapkan sekarang untuk Google Drive?

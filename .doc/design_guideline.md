@@ -40,7 +40,7 @@ Warna utama mewakili keandalan, stabilitas finansial, dan kesan profesional mode
 - **Success / Dana Masuk / Hibah**: Emerald Green (`#10B981` / Tailwind `emerald-600` untuk teks, `emerald-50` untuk background badge).
 - **Defisit / Alokasi Darurat**: Amber Gold (`#D97706` / Tailwind `amber-300` pada kartu biru, `amber-50` untuk badge transaksi).
 - **Dana Keluar / Netral**: Slate Text (`#334155` / Tailwind `slate-700`).
-- **Background Container (Option 2 Primary)**: Slate Light (`#F8FAFC` / `#FFFFFF` dengan border `#E2E8F0`).
+- **Background aplikasi (mode terang)**: `#F7F8FA`. Container dapat memakai `#FFFFFF` dengan border `#E2E8F0`.
 
 ---
 
@@ -71,6 +71,6 @@ Log aktivitas adalah menu khusus admin untuk membantu pelacakan. Gunakan tampila
 
 ## 5. Launchpad Utama
 
-Halaman `/` adalah launchpad setelah login dan menjadi menu utama aplikasi. Tampilkan kartu atau tautan menuju area yang boleh diakses role aktif, seperti dashboard, transaksi, anggota, pengaturan, dan Log Aktivitas untuk admin. Launchpad harus tetap ringkas, mobile-first, dan menyediakan akses kembali dari setiap area fitur.
+Halaman `/` menampilkan welcome screen bagi pengunjung tanpa session dan launchpad setelah login. Welcome screen memakai `brand.svg` dan tombol Get Started menuju login. Halaman login memakai `logo.svg`, yang sudah memuat logo dan slogan lengkap tanpa teks slogan tambahan. Pendaftaran mandiri tidak tersedia; admin membuat akun dan menetapkan password melalui panel pengguna. Jika lupa password, pengguna menghubungi admin. Launchpad menjadi menu utama aplikasi. Tampilkan kartu atau tautan menuju area yang boleh diakses role aktif, seperti dashboard, transaksi, anggota, pengaturan, dan Log Aktivitas untuk admin. Launchpad harus tetap ringkas, mobile-first, dan menyediakan akses kembali dari setiap area fitur.
 
 ---

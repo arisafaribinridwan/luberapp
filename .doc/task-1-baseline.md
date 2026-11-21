@@ -2,6 +2,8 @@
 
 Tanggal audit: 21 November 2026 (Asia/Jakarta).
 
+> Dokumen ini adalah snapshot audit historis sebelum Task 2 dan perubahan auth/UI berikutnya. Status dan gap di bawah tidak menggambarkan kondisi kode saat ini.
+
 ## Hasil verifikasi
 
 | Perintah / pemeriksaan | Hasil |
@@ -21,7 +23,7 @@ Preview production memerlukan `NUXT_BETTER_AUTH_SECRET` (atau secret alternatif 
 | Path target | Akses | Status saat audit |
 | --- | --- | --- |
 | `/` | Launchpad setelah session valid untuk semua role | Halaman starter, dapat dibaca guest |
-| `/login`, `/register`, `/two-factor` | Alur autentikasi; challenge 2FA sebelum session penuh | Belum ada |
+| `/login`, `/two-factor` | Alur autentikasi; challenge 2FA sebelum session penuh | Belum ada pada saat audit |
 | `/dashboard/**` dan halaman baca lain | Session valid; data `member` dibatasi ke miliknya | Belum ada |
 | `/transactions/**` | `pengurus` dan `admin` sesuai kewenangan operasi | Belum ada |
 | `/transfers/**`, `/settings/**`, `/admin/**` | `admin` untuk mutasi dan log yang dilindungi | Belum ada |
@@ -36,7 +38,7 @@ Nama `/api/public/**` pada spesifikasi berarti endpoint baca, bukan akses anonim
 - `member` membaca dashboard dan data miliknya; `pengurus` dapat mencatat transaksi yang diizinkan; `admin` mengelola pengguna, rekening, transfer, konfigurasi, dan audit log.
 - Semua halaman dan API aplikasi memerlukan session valid. Session kedaluwarsa setelah satu jam tanpa aktivitas; guest diarahkan ke login dan login berhasil menuju `/`.
 - `server/auth.config.ts` saat ini hanya mengaktifkan email/password. `app/auth.config.ts` kosong. Belum ada role, idle timeout, database adapter, route guard, atau helper `requireRole`.
-- `.doc/flow.md` menyebut login username + password/PIN, sedangkan `.doc/nuxt-better-auth-libsql-drizzle-guide.md` memakai email/password. Perbedaan ini perlu diputuskan pada Task 2 sebelum membuat form dan schema auth. Prioritas role tiga tingkat mengikuti PRD/flow/database, bukan contoh dua role pada guide.
+- Pada saat audit, `.doc/flow.md` menyebut login username + password/PIN, sedangkan `.doc/nuxt-better-auth-libsql-drizzle-guide.md` memakai email/password. Keputusan implementasi saat ini memakai email/password, tiga role, dan akun hanya dibuat admin.
 
 ### Struktur direktori Nuxt 4
 

@@ -10,7 +10,7 @@
 
 Tabel pengguna menyimpan tiga role yang valid: `member`, `pengurus`, dan `admin`. Semua data aplikasi dibaca atau diubah melalui session Better Auth yang valid; tidak ada pengguna anonim. PWA tidak menyimpan data transaksi atau session sebagai data offline yang dapat digunakan kembali.
 
-Session harus menyimpan waktu aktivitas terakhir (`lastActivityAt`) atau metadata setara yang dapat diperbarui pada request terautentikasi. Session dianggap kedaluwarsa setelah 1 jam tanpa aktivitas dan harus dihapus/ditolak oleh middleware. Setelah kedaluwarsa, client kembali ke login screen; setelah login ulang client menuju launchpad `/`.
+Session harus menyimpan waktu aktivitas terakhir (`lastActivityAt`) atau metadata setara yang dapat diperbarui pada request terautentikasi. Session dianggap kedaluwarsa setelah 1 jam tanpa aktivitas dan harus dihapus/ditolak oleh middleware. Setelah kedaluwarsa, client kembali ke welcome screen `/`; setelah login ulang client menuju launchpad `/`.
 
 ## 2. Database Implementation Pattern
 
@@ -171,7 +171,7 @@ import { sql } from 'drizzle-orm'
 // 1. Better-Auth Users Table (All Authenticated Users)
 export const users = sqliteTable('users', {
   id: text('id').primaryKey(),
-  username: text('username').notNull().unique(),
+  email: text('email').notNull().unique(),
   name: text('name').notNull(),
   role: text('role').default('member').notNull(), // member | pengurus | admin
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(CURRENT_TIMESTAMP)`),

@@ -41,7 +41,9 @@ Aplikasi dibangun dengan standar modern *Full-Stack SSR/Edge Application* menggu
 
 ## 3. Authentication, Roles & Session Policy
 
-Semua pengguna aplikasi wajib login sebelum dapat mengakses halaman, dashboard, data, atau API aplikasi (selain endpoint login). Alur awal pengguna adalah: **buka alamat website → splash screen → login screen → launchpad (`/`)**.
+Semua pengguna aplikasi wajib login sebelum dapat mengakses halaman fitur, dashboard, data, atau API aplikasi. Alur awal pengguna tanpa session adalah: **buka alamat website → welcome screen (`/`) → Get Started → login screen → launchpad (`/`)**. Pengguna dengan session aktif langsung melihat launchpad di `/`.
+
+Login menggunakan email dan password untuk semua role. Pengguna tidak dapat mendaftar sendiri; hanya admin yang membuat akun dan menetapkan password melalui panel admin. Jika pengguna lupa password, mereka harus menghubungi admin.
 
 Launchpad adalah halaman utama setelah login dan menjadi menu untuk masuk ke seluruh area aplikasi. Launchpad tidak menggantikan halaman fitur; launchpad menyediakan tautan menuju dashboard, transaksi, data anggota, pengaturan, dan Log Aktivitas sesuai role pengguna.
 
@@ -53,7 +55,7 @@ Launchpad adalah halaman utama setelah login dan menjadi menu untuk masuk ke sel
 | `pengurus` | Mengakses launchpad lalu memakai seluruh akses `member`, serta pencatatan dan pengelolaan transaksi operasional sesuai kewenangan organisasi. |
 | `admin` | Mengakses launchpad lalu memakai seluruh akses `pengurus`, serta pengelolaan pengguna, role, rekening manual, konfigurasi, Log Aktivitas, dan seluruh operasi administrasi. |
 
-Role disimpan pada akun pengguna dan diverifikasi pada setiap route server. Tidak ada role anonim atau akses aplikasi tanpa session aktif; endpoint login adalah satu-satunya pengecualian untuk membuat session.
+Role disimpan pada akun pengguna dan diverifikasi pada setiap route server. Tidak ada role anonim atau akses data aplikasi tanpa session aktif; welcome screen dan halaman autentikasi dapat diakses tanpa session.
 
 ### 3.2 Log Aktivitas Admin
 
@@ -63,7 +65,7 @@ Halaman dan endpoint log hanya tersedia untuk `admin`. `member` dan `pengurus` t
 
 ### 3.3 Session
 
-Session dikelola oleh `@nuxtjs/better-auth` dan berakhir setelah **1 jam tanpa aktivitas**. Setiap request atau interaksi terautentikasi yang valid memperbarui waktu aktivitas terakhir. Ketika session kedaluwarsa, pengguna diarahkan kembali ke login screen dan harus login ulang sebelum kembali ke launchpad.
+Session dikelola oleh `@nuxtjs/better-auth` dan berakhir setelah **1 jam tanpa aktivitas**. Setiap request atau interaksi terautentikasi yang valid memperbarui waktu aktivitas terakhir. Ketika session kedaluwarsa, pengguna diarahkan kembali ke welcome screen dan harus login ulang sebelum kembali ke launchpad.
 
 ## 4. Technology Stack Specification
 
@@ -78,7 +80,7 @@ Session dikelola oleh `@nuxtjs/better-auth` dan berakhir setelah **1 jam tanpa a
 | **Backend Layers** | API Route (Auth/Val) → Service (Logic) → Repository (DB) | API Route (Auth/Val) → Service (Logic) → Repository (DB) |
 | **ORM & Database Driver** | Drizzle ORM + `@libsql/client` (file-based SQLite) | Drizzle ORM + `@libsql/client` (Turso LibSQL Driver) |
 | **Database Engine** | SQLite Local File (`./sqlite.db`) | Turso SQLite Cloud (Edge Replicated) |
-| **Authentication** | `@nuxtjs/better-auth` (Username Plugin), role-based access, idle timeout 1 jam | `@nuxtjs/better-auth` (Username Plugin), role-based access, idle timeout 1 jam |
+| **Authentication** | `@nuxtjs/better-auth` (email/password), admin-only account creation, role-based access, idle timeout 1 jam | `@nuxtjs/better-auth` (email/password), admin-only account creation, role-based access, idle timeout 1 jam |
 | **Attachment Storage** | Google Drive API (Service Account / OAuth2) | Google Drive API (Service Account / OAuth2) |
 
 ---
