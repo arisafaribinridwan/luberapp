@@ -1,64 +1,32 @@
-# Nuxt Starter Template
+# Luber
 
-[![Nuxt UI](https://img.shields.io/badge/Made%20with-Nuxt%20UI-00DC82?logo=nuxt&labelColor=020420)](https://ui.nuxt.com)
+Aplikasi pencatatan keuangan komunitas berbasis Nuxt 4. Repository saat ini masih berada pada tahap fondasi; halaman utama masih template Nuxt UI dan belum dilindungi session.
 
-Use this template to get started with [Nuxt UI](https://ui.nuxt.com) quickly.
+## Menjalankan proyek
 
-- [Live demo](https://starter-template.nuxt.dev/)
-- [Documentation](https://ui.nuxt.com/docs/getting-started/installation/nuxt)
-
-<a href="https://starter-template.nuxt.dev/" target="_blank">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://ui.nuxt.com/assets/templates/nuxt/starter-dark.png">
-    <source media="(prefers-color-scheme: light)" srcset="https://ui.nuxt.com/assets/templates/nuxt/starter-light.png">
-    <img alt="Nuxt Starter Template" src="https://ui.nuxt.com/assets/templates/nuxt/starter-light.png" width="830" height="466">
-  </picture>
-</a>
-
-> The starter template for Vue is on https://github.com/nuxt-ui-templates/starter-vue.
-
-## Quick Start
-
-```bash [Terminal]
-npm create nuxt@latest -- -t ui
-```
-
-## Deploy your own
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-name=starter&repository-url=https%3A%2F%2Fgithub.com%2Fnuxt-ui-templates%2Fstarter&demo-image=https%3A%2F%2Fui.nuxt.com%2Fassets%2Ftemplates%2Fnuxt%2Fstarter-dark.png&demo-url=https%3A%2F%2Fstarter-template.nuxt.dev%2F&demo-title=Nuxt%20Starter%20Template&demo-description=A%20minimal%20template%20to%20get%20started%20with%20Nuxt%20UI.)
-
-## Setup
-
-Make sure to install the dependencies:
+Gunakan Node.js 20 atau lebih baru dan pnpm versi yang tertera di `package.json`.
 
 ```bash
 pnpm install
-```
-
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
 pnpm dev
 ```
 
-## Production
+Server development tersedia di `http://localhost:3000`.
 
-Build the application for production:
+## Verifikasi
 
 ```bash
 pnpm build
+pnpm lint
+pnpm typecheck
 ```
 
-Locally preview production build:
+Untuk menjalankan hasil build dalam mode production, sediakan `NUXT_BETTER_AUTH_SECRET` minimal 32 karakter sebelum `pnpm preview`. Simpan secret di environment lokal atau platform deployment, bukan di repository.
 
-```bash
-pnpm preview
-```
+## Rencana implementasi
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+- [Task plan](.doc/task-plan.md)
+- [Audit baseline Task 1](.doc/task-1-baseline.md)
+- [Spesifikasi produk](.doc/prd.md)
 
-## Renovate integration
-
-Install [Renovate GitHub app](https://github.com/apps/renovate/installations/select_target) on your repository and you are good to go.
+Kode aplikasi berada di `app/`, kode backend di `server/`, dan tipe/constants yang digunakan kedua sisi akan berada di `shared/`.
