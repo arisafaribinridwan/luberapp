@@ -10,7 +10,7 @@
 
 Tabel pengguna menyimpan tiga role yang valid: `member`, `pengurus`, dan `admin`. Semua data aplikasi dibaca atau diubah melalui session Better Auth yang valid; tidak ada pengguna anonim. PWA tidak menyimpan data transaksi atau session sebagai data offline yang dapat digunakan kembali.
 
-Session harus menyimpan waktu aktivitas terakhir (`lastActivityAt`) atau metadata setara yang dapat diperbarui pada request terautentikasi. Session dianggap kedaluwarsa setelah 1 jam tanpa aktivitas dan harus dihapus/ditolak oleh middleware. Setelah kedaluwarsa, client kembali ke login screen.
+Session harus menyimpan waktu aktivitas terakhir (`lastActivityAt`) atau metadata setara yang dapat diperbarui pada request terautentikasi. Session dianggap kedaluwarsa setelah 1 jam tanpa aktivitas dan harus dihapus/ditolak oleh middleware. Setelah kedaluwarsa, client kembali ke login screen; setelah login ulang client menuju launchpad `/`.
 
 ## 2. Database Implementation Pattern
 
@@ -25,7 +25,8 @@ server/database/
     ├── user.ts              # tabel Better Auth
     ├── member.ts            # master anggota
     ├── transaction.ts       # jurnal transaksi
-    └── manual-account.ts    # daftar rekening manual
+    ├── manual-account.ts    # daftar rekening manual
+    └── audit-log.ts         # log kejadian aplikasi (append-only)
 ```
 
 ### 2.1 Koneksi Database
@@ -61,6 +62,7 @@ export const databaseSchema = {
   manualAccount,
   member,
   transaction,
+  auditLog,
   user,
   // tabel Better Auth lain: account, session, verification
 }
@@ -73,6 +75,15 @@ export const relations = defineRelations(databaseSchema, (r) => ({
     member: r.one.member({
       from: r.transaction.memberId,
       to: r.member.id,
+    }),
+  },
+  user: {
+    auditLogs: r.many.auditLog(),
+  },
+  auditLog: {
+    actor: r.one.user({
+      from: r.auditLog.actorId,
+      to: r.user.id,
     }),
   },
 }))
@@ -128,6 +139,21 @@ export const TRANSACTION_TYPES = [
 ] as const
 
 export type TransactionType = (typeof TRANSACTION_TYPES)[number]
+
+export const AUDIT_EVENT_TYPES = [
+  'LOGIN_SUCCEEDED',
+  'LOGIN_FAILED',
+  'LOGOUT',
+  'ACTION_REJECTED',
+  'TRANSACTION_CREATED',
+  'TRANSFER_CREATED',
+  'MANUAL_ACCOUNT_CREATED',
+  'MANUAL_ACCOUNT_UPDATED',
+  'USER_UPDATED',
+  'CONFIG_UPDATED',
+] as const
+
+export type AuditEventType = (typeof AUDIT_EVENT_TYPES)[number]
 ```
 
 Constants bersama disimpan dalam `server/database/schema/constants.ts` atau modul constants domain yang sesuai. Constants tersebut wajib diimpor dan digunakan oleh schema files serta validation schema; jangan menduplikasi daftar enum sebagai string literal di masing-masing file.
@@ -185,6 +211,18 @@ export const transactions = sqliteTable('transactions', {
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(CURRENT_TIMESTAMP)`)
 })
 
+// 4. Application Audit Log (admin read-only)
+export const auditLog = sqliteTable('audit_logs', {
+  id: text('id').primaryKey(),
+  eventType: text('event_type').notNull(),
+  summary: text('summary').notNull(),
+  actorId: text('actor_id').references(() => users.id),
+  targetType: text('target_type'),
+  targetId: text('target_id'),
+  metadataJson: text('metadata_json'), // metadata ringkas, tanpa password/PIN/token/file content
+  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(CURRENT_TIMESTAMP)`),
+})
+
 ```
 
 ### 3.1 Saldo Awal Defisit dan Hibah Penutup
@@ -236,6 +274,14 @@ Rekening yang dinonaktifkan tidak boleh dipilih untuk transaksi baru, tetapi tet
 Transfer internal disimpan sebagai satu baris pada jurnal transaksi dengan `debitAccount` dan `creditAccount` sama-sama mengarah ke akun COA `1-1001` (Kas & Bank Utama). Nilai `sourceAccount` dan `destinationAccount` menjadi audit trail rekening fisik yang menunjukkan perpindahan dana. Karena kedua sisi berasal dari akun COA yang sama, total saldo kas komunitas tetap dan hanya saldo rekening manual yang berubah.
 
 Pencatatan transfer harus dilakukan dalam satu transaksi database. Jika salah satu pembaruan gagal, pencatatan jurnal dan perubahan saldo rekening manual harus dibatalkan bersama. Transfer yang sudah tersimpan bersifat immutable; pembatalan atau koreksi dibuat sebagai transaksi pembalik agar riwayat tetap lengkap.
+
+### 3.5 Aturan Log Aktivitas
+
+`audit_logs` menyimpan satu baris untuk setiap kejadian penting yang berhasil atau ditolak. `actorId` boleh kosong untuk login yang gagal atau kejadian sebelum pengguna dikenali. `targetType` dan `targetId` dipakai bila kejadian berkaitan dengan data tertentu, misalnya transaksi atau rekening manual.
+
+Log dibuat oleh server setelah kejadian diproses. Log bersifat *append-only*; tidak ada operasi update atau delete melalui aplikasi. `metadataJson` hanya berisi metadata singkat yang membantu pelacakan, bukan payload penuh, password, PIN, token, atau isi lampiran.
+
+Minimal kejadian yang dicatat adalah login berhasil, login gagal, logout, pembuatan transaksi, pembuatan transfer, pembuatan/perubahan rekening manual, perubahan pengguna atau role, dan perubahan konfigurasi. Pembacaan log admin tidak perlu membuat log baru agar tidak menghasilkan rekursi.
 
 ---
 

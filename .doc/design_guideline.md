@@ -59,4 +59,18 @@ Warna utama mewakili keandalan, stabilitas finansial, dan kesan profesional mode
 | **Meta / Date** | `text-[10px]` (10px)| `font-medium` (500) | `31 Jan 2026` |
 | **Badge Label** | `text-[10px]` (10px)| `font-semibold` (600)| `Hibah Penyehatan Kas` |
 
+## 4. Halaman Log Aktivitas Admin
+
+Log aktivitas adalah menu khusus admin untuk membantu pelacakan. Gunakan tampilan yang sederhana dan konsisten dengan halaman pengaturan:
+
+* Tampilkan judul **Log Aktivitas** dan keterangan singkat bahwa isinya hanya-baca.
+* Tampilkan tabel atau daftar kartu dengan waktu, jenis kejadian, pelaku, ringkasan, dan target data bila tersedia.
+* Sediakan filter ringkas untuk rentang tanggal, jenis kejadian, dan pelaku. Di mobile, filter dapat dibuka melalui panel atau popover.
+* Gunakan badge warna netral untuk kejadian umum, hijau untuk aksi berhasil, dan amber/merah untuk login atau aksi yang gagal. Jangan menampilkan password, PIN, token, atau isi lampiran.
+* Jangan tampilkan menu atau data log kepada `member` dan `pengurus`. Tidak ada tombol edit atau hapus.
+
+## 5. Launchpad Utama
+
+Halaman `/` adalah launchpad setelah login dan menjadi menu utama aplikasi. Tampilkan kartu atau tautan menuju area yang boleh diakses role aktif, seperti dashboard, transaksi, anggota, pengaturan, dan Log Aktivitas untuk admin. Launchpad harus tetap ringkas, mobile-first, dan menyediakan akses kembali dari setiap area fitur.
+
 ---

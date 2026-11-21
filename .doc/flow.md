@@ -12,18 +12,26 @@ Semua pengguna wajib melewati alur berikut:
 
 1. Pengguna membuka alamat website.
 2. Aplikasi menampilkan **splash screen** untuk memuat konfigurasi dan memeriksa session.
-3. Jika session aktif dan belum idle selama 1 jam, aplikasi membuka halaman sesuai role.
+3. Jika session aktif dan belum idle selama 1 jam, aplikasi membuka launchpad di `/`.
 4. Jika tidak ada session atau session sudah kedaluwarsa, aplikasi menampilkan **login screen**.
-5. Setelah login berhasil, pengguna diarahkan ke dashboard sesuai role (`member`, `pengurus`, atau `admin`).
+5. Setelah login berhasil, pengguna diarahkan ke **launchpad di `/`**.
 6. Setelah 1 jam tanpa aktivitas, session dihapus/dianggap kedaluwarsa dan pengguna dikembalikan ke login screen.
 
-Tidak ada dashboard, data, atau operasi aplikasi yang dapat diakses sebelum login. Saat offline, PWA hanya menampilkan shell atau halaman cache yang aman; pembacaan data terbaru dan seluruh operasi transaksi tetap memerlukan koneksi serta session aktif.
+Tidak ada launchpad, dashboard, data, atau operasi aplikasi yang dapat diakses sebelum login. Saat offline, PWA hanya menampilkan shell atau halaman cache yang aman; pembacaan data terbaru dan seluruh operasi transaksi tetap memerlukan koneksi serta session aktif.
 
 ### 1.1 Role-Based Navigation
 
-* **Member**: dashboard dan data pribadi secara *read-only*.
-* **Pengurus**: akses member ditambah pencatatan transaksi yang menjadi kewenangannya.
-* **Admin**: akses penuh, termasuk pengguna, rekening manual, konfigurasi, dan seluruh transaksi.
+* **Member**: launchpad, dashboard, dan data pribadi secara *read-only*.
+* **Pengurus**: launchpad, akses member, dan pencatatan transaksi yang menjadi kewenangannya.
+* **Admin**: launchpad dan akses penuh, termasuk pengguna, rekening manual, konfigurasi, Log Aktivitas, dan seluruh transaksi.
+
+Launchpad di `/` adalah menu utama setelah login. Kartu atau tautan menu ditampilkan berdasarkan role: semua role mendapat akses ke dashboard dan area baca, `pengurus` mendapat menu pencatatan transaksi, dan `admin` mendapat menu pengelolaan serta Log Aktivitas. Pengguna tetap dapat kembali ke launchpad dari setiap area.
+
+### 1.2 Riwayat Log Admin
+
+Menu **Log Aktivitas** hanya muncul pada navigasi `admin`. Admin melihat daftar kejadian terbaru dalam urutan waktu menurun, dengan informasi waktu, jenis kejadian, pelaku, ringkasan, dan data yang terdampak bila tersedia.
+
+Admin dapat memfilter berdasarkan rentang tanggal, jenis kejadian, atau pelaku. Tampilan cukup berupa tabel yang dapat digulir di mobile. Tidak tersedia tombol untuk mengubah atau menghapus log. Jika bukan admin yang membuka halaman atau endpoint ini, akses ditolak.
 
 ## 2. Functional Workflows & User Experience
 
@@ -92,6 +100,10 @@ Tidak ada dashboard, data, atau operasi aplikasi yang dapat diakses sebelum logi
 * Setelah validasi berhasil, transfer langsung tercatat sebagai satu transaksi dan saldo kedua rekening diperbarui secara atomik.
 * Transfer menampilkan pengurangan pada rekening asal dan penambahan pada rekening tujuan; total saldo kas komunitas tidak berubah.
 * Riwayat transfer menyimpan admin pembuat dan waktu pencatatan. Transfer yang sudah tercatat tidak diedit atau dihapus; koreksi dilakukan melalui transaksi pembalik.
+
+#### Log Kejadian
+
+Setelah aksi penting diproses, server menambahkan log secara otomatis. Kejadian yang dicatat meliputi login berhasil/gagal, logout, transaksi atau transfer baru, perubahan rekening manual, perubahan pengguna atau role, dan perubahan konfigurasi. Jika aksi ditolak, log menyimpan ringkasan penolakan tanpa menyimpan data rahasia. Log bersifat hanya-baca dan hanya dapat ditampilkan kepada admin.
 
 
 

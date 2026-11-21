@@ -98,11 +98,11 @@ nuxt-auth-boilerplate/
 │  ├─ composables/
 │  │  └─ useRole.ts                ← helper cek role di UI
 │  └─ pages/
-│     ├─ index.vue
+│     ├─ index.vue              ← launchpad utama setelah login
 │     ├─ login.vue
 │     ├─ register.vue
 │     ├─ two-factor.vue            ← challenge 2FA saat login
-│     ├─ app/
+│     ├─ dashboard/
 │     │  ├─ index.vue              ← dashboard (semua user login)
 │     │  └─ security.vue           ← setup 2FA
 │     ├─ member/
@@ -192,7 +192,7 @@ export default defineNuxtConfig({
   auth: {
     redirects: {
       login: '/login',
-      authenticated: '/app', // tujuan setelah sign in / sign up sukses
+      authenticated: '/', // launchpad setelah sign in / sign up sukses
       logout: '/login',
     },
     preserveRedirect: true, // tambahkan ?redirect=... saat dilempar ke /login
@@ -200,15 +200,16 @@ export default defineNuxtConfig({
 
   routeRules: {
     // Hanya tamu (belum login)
-    '/login': { auth: { only: 'guest', redirectTo: '/app' } },
-    '/register': { auth: { only: 'guest', redirectTo: '/app' } },
+    '/login': { auth: { only: 'guest', redirectTo: '/' } },
+    '/register': { auth: { only: 'guest', redirectTo: '/' } },
 
     // Semua user yang sudah login, apa pun rolenya
-    '/app/**': { auth: { only: 'user', redirectTo: '/login' } },
+    '/': { auth: { only: 'user', redirectTo: '/login' } },
+    '/dashboard/**': { auth: { only: 'user', redirectTo: '/login' } },
 
     // Hanya role tertentu. Array = OR (salah satu role cukup)
-    '/member/**': { auth: { user: { role: ['member', 'admin'] }, redirectTo: '/app' } },
-    '/admin/**': { auth: { user: { role: 'admin' }, redirectTo: '/app' } },
+    '/member/**': { auth: { user: { role: ['member', 'admin'] }, redirectTo: '/' } },
+    '/admin/**': { auth: { user: { role: 'admin' }, redirectTo: '/' } },
   },
 })
 ```
@@ -565,7 +566,7 @@ Semua halaman memakai composable auto-import dari modul: `useUserSession`, `useS
     <h1>Nuxt Auth Boilerplate</h1>
     <NuxtLink to="/login">Login</NuxtLink> |
     <NuxtLink to="/register">Register</NuxtLink> |
-    <NuxtLink to="/app">Dashboard</NuxtLink>
+    <NuxtLink to="/">Launchpad</NuxtLink>
   </main>
 </template>
 ```
@@ -611,7 +612,7 @@ const password = ref('')
 const { execute, status, error } = useSignIn('email')
 
 // Jika 2FA aktif, twoFactorClient mengarahkan ke /two-factor.
-// Jika tidak, redirect otomatis ke /app (atau ?redirect=... yang aman).
+// Jika tidak, redirect otomatis ke / (launchpad) atau ?redirect=... yang aman.
 async function submit() {
   await execute({ email: email.value, password: password.value })
 }
@@ -662,7 +663,7 @@ async function verify() {
       error.value = res.error.message ?? 'Kode tidak valid'
       return
     }
-    await navigateTo('/app')
+    await navigateTo('/')
   } finally {
     loading.value = false
   }
@@ -693,7 +694,7 @@ async function verify() {
 </template>
 ```
 
-### `app/pages/app/index.vue` (dashboard, semua user login)
+### `app/pages/index.vue` (launchpad, semua user login)
 
 Menu muncul sesuai role.
 
@@ -706,7 +707,8 @@ const { execute: signOut, status } = useSignOut()
 
 <template>
   <main>
-    <h1>Dashboard</h1>
+    <h1>Launchpad</h1>
+    <p>Menu utama untuk masuk ke dashboard dan area aplikasi sesuai role.</p>
     <p>Halo, {{ user?.name }} ({{ user?.email }})</p>
     <p>
       Role: <strong>{{ user?.role }}</strong> ·
@@ -714,7 +716,7 @@ const { execute: signOut, status } = useSignOut()
     </p>
 
     <nav>
-      <NuxtLink to="/app/security">Keamanan (2FA)</NuxtLink>
+      <NuxtLink to="/security">Keamanan (2FA)</NuxtLink>
       <NuxtLink v-if="hasRole('member', 'admin')" to="/member"> | Area Member</NuxtLink>
       <NuxtLink v-if="hasRole('admin')" to="/admin"> | Admin</NuxtLink>
     </nav>
@@ -739,12 +741,12 @@ const { data, error } = await useFetch('/api/member/me')
     <p>Halaman ini hanya untuk role <code>member</code> dan <code>admin</code>.</p>
     <pre v-if="data">{{ data }}</pre>
     <p v-if="error" role="alert">{{ error.statusMessage }}</p>
-    <NuxtLink to="/app">← Dashboard</NuxtLink>
+    <NuxtLink to="/">← Launchpad</NuxtLink>
   </main>
 </template>
 ```
 
-### `app/pages/app/security.vue` (setup 2FA)
+### `app/pages/security.vue` (setup 2FA)
 
 Alurnya: masukkan password, panggil `enable` untuk mendapat `totpURI` dan `backupCodes`, scan QR, lalu verifikasi satu kode. 2FA baru aktif setelah verifikasi itu.
 
@@ -858,7 +860,7 @@ async function regenerate() {
 
     <p v-if="info">{{ info }}</p>
     <p v-if="error" role="alert">{{ error }}</p>
-    <NuxtLink to="/app">← Kembali</NuxtLink>
+    <NuxtLink to="/">← Kembali ke Launchpad</NuxtLink>
   </main>
 </template>
 ```
@@ -953,7 +955,7 @@ watch(page, load)
 <template>
   <main>
     <h1>Admin: Manajemen User</h1>
-    <NuxtLink to="/app">← Dashboard</NuxtLink>
+    <NuxtLink to="/">← Launchpad</NuxtLink>
 
     <form @submit.prevent="onSearch">
       <input v-model="search" placeholder="Cari email…" />
@@ -1049,6 +1051,10 @@ export default defineEventHandler(async (event) => {
 
 Endpoint yang cukup mewajibkan login (apa pun rolenya) memakai `requireUserSession(event)` langsung.
 
+### Endpoint Log Aktivitas Admin
+
+Untuk halaman log aktivitas Luber, gunakan `requireRole(event, 'admin')` langsung pada `GET /api/admin/audit-logs`. Pemeriksaan role di client hanya untuk menyembunyikan menu; endpoint tetap wajib menolak role lain dengan `403`. Endpoint log bersifat read-only dan tidak menyediakan operasi update atau delete.
+
 Query bergaya SQL (`db.select()`, `db.insert()`, dan seterusnya) berjalan seperti biasa. Jika memakai Relational Queries (`db.query.<tabel>`), gunakan sintaks v2 dengan `where` berbentuk objek:
 
 ```ts
@@ -1070,7 +1076,7 @@ Hal yang sama bisa dipasang di route rules, misalnya mewajibkan admin memakai 2F
 '/admin/**': {
   auth: {
     user: { role: 'admin', twoFactorEnabled: true },
-    redirectTo: '/app/security',
+    redirectTo: '/security',
   },
 },
 ```
@@ -1102,14 +1108,14 @@ Setelah ada satu admin, role user lain diubah dari halaman `/admin` lewat dropdo
 
 **Auth dan 2FA**
 
-1. Daftar user A, jadikan admin (bagian 15), lalu login. Anda diarahkan ke `/app`.
-2. Buka `/app/security`, aktifkan 2FA, scan QR, simpan backup code, lalu konfirmasi kode. Status berubah menjadi "Aktif".
+1. Daftar user A, jadikan admin (bagian 15), lalu login. Anda diarahkan ke launchpad `/`.
+2. Buka `/security`, aktifkan 2FA, scan QR, simpan backup code, lalu konfirmasi kode. Status berubah menjadi "Aktif".
 3. Sign out lalu login lagi. Anda diarahkan ke `/two-factor`. Masukkan kode TOTP. Coba juga alur dengan backup code.
 
 **Role**
 
 4. Daftar user B (browser lain atau incognito). Cek di Drizzle Studio: `role` bernilai `member`.
-5. Login sebagai B (member): `/member` bisa dibuka, `/admin` diarahkan ke `/app`, `GET /api/admin/stats` mengembalikan 403, dan `GET /api/member/me` berhasil.
+5. Login sebagai B (member): `/member` bisa dibuka, `/admin` diarahkan ke `/`, `GET /api/admin/stats` mengembalikan 403, dan `GET /api/member/me` berhasil.
 6. Login sebagai A (admin): `/member` dan `/admin` bisa dibuka, dan `GET /api/admin/stats` berhasil.
 7. Dari `/admin`, ubah role B menjadi `admin`, lalu kembalikan ke `member`. B harus login ulang agar perubahan role berlaku di sesinya.
 8. Ban user B. Login B harus gagal dengan pesan banned.
@@ -1153,7 +1159,7 @@ Ada dua cara. Pilih sesuai cakupannya.
 ```ts
 routeRules: {
   // ...aturan lain
-  '/editor/**': { auth: { user: { role: ['editor', 'admin'] }, redirectTo: '/app' } },
+  '/editor/**': { auth: { user: { role: ['editor', 'admin'] }, redirectTo: '/' } },
 },
 ```
 
@@ -1165,7 +1171,7 @@ definePageMeta({
   auth: {
     only: 'user',
     user: { role: ['editor', 'admin'] },
-    redirectTo: '/app',
+    redirectTo: '/',
   },
 })
 </script>
@@ -1182,14 +1188,14 @@ Page meta menimpa route rules global untuk halaman tersebut.
   <main>
     <h1>Area Editor</h1>
     <p>Hanya untuk role <code>editor</code> dan <code>admin</code>.</p>
-    <NuxtLink to="/app">← Dashboard</NuxtLink>
+    <NuxtLink to="/">← Launchpad</NuxtLink>
   </main>
 </template>
 ```
 
 ### Langkah 4: Tampilkan menu hanya untuk role yang berhak
 
-Di `app/pages/app/index.vue`:
+Di `app/pages/index.vue` (launchpad):
 
 ```vue
 <NuxtLink v-if="hasRole('editor', 'admin')" to="/editor"> | Area Editor</NuxtLink>
@@ -1214,8 +1220,8 @@ Login sebagai admin, buka `/admin`, pilih `editor` pada dropdown role user yang 
 
 ### Langkah 7: Uji
 
-- Login sebagai `editor`: `/editor` terbuka, `/admin` diarahkan ke `/app`.
-- Login sebagai `member`: `/editor` diarahkan ke `/app`.
+- Login sebagai `editor`: `/editor` terbuka, `/admin` diarahkan ke `/`.
+- Login sebagai `member`: `/editor` diarahkan ke `/`.
 - Panggil `/api/editor/posts` sebagai `member`: harus 403.
 
 ### Peta akses (contoh hasil akhir)
@@ -1223,7 +1229,7 @@ Login sebagai admin, buka `/admin`, pilih `editor` pada dropdown role user yang 
 | Path | Siapa yang boleh | Mekanisme |
 | --- | --- | --- |
 | `/`, `/login`, `/register`, `/two-factor` | Publik (login/register: tamu saja) | `only: 'guest'` atau tanpa aturan |
-| `/app/**` | Semua user yang login | `only: 'user'` |
+| `/` dan area fitur terautentikasi | Semua user yang login | `only: 'user'` |
 | `/member/**` | member, admin | `role: ['member', 'admin']` |
 | `/editor/**` | editor, admin | `role: ['editor', 'admin']` |
 | `/admin/**` | admin | `role: 'admin'` |
@@ -1317,8 +1323,8 @@ Perubahan yang hanya menyentuh relations (tanpa tabel atau kolom baru) tidak men
 | Setelah ubah role, akses tetap ditolak | Sesi lama masih membawa role lama | Login ulang atau `fetchSession({ force: true })` |
 | Role `editor` tidak bisa memakai endpoint kelola user | Role tidak ada di `adminRoles` | Tambahkan ke `adminRoles` dan beri permission (bagian 17) |
 | User multi-role (`"a,b"`) tidak cocok dengan route rule | Route rules mencocokkan nilai persis | Pakai satu role per user, atau `rule` callback dengan `split(',')` |
-| Redirect berputar (loop) | Halaman tujuan `redirectTo` juga dibatasi role yang sama | Arahkan `redirectTo` ke halaman yang hanya butuh login, seperti `/app` |
-| Pengguna yang belum login dibuka ke `/admin` lalu berakhir di `/login` tanpa kembali ke `/admin` | `redirectTo: '/app'` pada aturan role mengalihkan dulu ke `/app` | Perilaku normal. Setelah login, user masuk ke `/app` |
+| Redirect berputar (loop) | Halaman tujuan `redirectTo` juga dibatasi role yang sama | Arahkan `redirectTo` ke launchpad `/` |
+| Pengguna yang belum login dibuka ke `/admin` lalu berakhir di `/login` tanpa kembali ke `/admin` | `redirectTo: '/'` pada aturan role mengalihkan dulu ke launchpad | Perilaku normal. Setelah login, user masuk ke `/` |
 | Tipe `role` / `twoFactorEnabled` tidak muncul | Cache tipe | Jalankan `npx nuxi prepare` dan restart TS server |
 | Error secret / `baseURL` saat start | `NUXT_BETTER_AUTH_SECRET` kurang dari 32 karakter atau kosong | Generate ulang secret |
 | Method client plugin `undefined` | Plugin client belum didaftarkan | Tambahkan `adminClient({ ac, roles })` / `twoFactorClient()` di `app/auth.config.ts` |

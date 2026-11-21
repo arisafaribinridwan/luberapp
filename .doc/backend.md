@@ -49,7 +49,8 @@ Pola ini mengikuti struktur direktori Nuxt untuk menjaga auto-import berdasarkan
 * Session berakhir setelah 1 jam tanpa aktivitas. Middleware memperbarui aktivitas pada request terautentikasi dan mengembalikan HTTP 401 saat idle timeout terlewati.
 * Role pengguna adalah `member`, `pengurus`, atau `admin`. Gunakan pemeriksaan terpusat seperti `requireRole(event, roles)` setelah session ditemukan.
 * `member` hanya dapat membaca dashboard dan data miliknya; `pengurus` dapat melakukan operasi transaksi yang diizinkan; `admin` memiliki akses penuh termasuk pengguna, role, rekening manual, dan konfigurasi.
-* Login berhasil melalui `POST /api/auth/login` mengarahkan client ke halaman sesuai role. Session yang tidak valid mengarahkan client ke login screen. Service worker hanya mencache asset shell dan response baca yang aman; response autentikasi, session, dan mutasi tidak boleh dicache.
+* Login berhasil melalui `POST /api/auth/login` mengarahkan client ke launchpad `/`. Session yang tidak valid mengarahkan client ke login screen. Service worker hanya mencache asset shell dan response baca yang aman; response autentikasi, session, dan mutasi tidak boleh dicache.
+* Log aktivitas hanya boleh dibaca oleh `admin`. Pemeriksaan role dilakukan di server pada setiap request log; menyembunyikan menu di client saja tidak cukup.
 
 ## 2. Backend Implementation Pattern
 
@@ -81,6 +82,7 @@ Aturan backend:
 * Tipe input/output diturunkan dari schema Drizzle (`$inferSelect`, `$inferInsert`) dan schema Zod.
 * Error validasi dikembalikan sebagai error HTTP terstruktur; jangan meneruskan error database mentah ke client.
 * Schema transaksi dipisah berdasarkan arah dana: schema Cash In mewajibkan `destinationAccount`, sedangkan schema Cash Out mewajibkan `sourceAccount`.
+* Setelah aksi penting selesai atau ditolak, service menulis satu baris ke `audit_logs`. Penulisan log tidak boleh menyimpan password, PIN, token, atau isi file bukti.
 
 ### 2.1 Tanggung Jawab Tiap Layer
 
@@ -112,6 +114,12 @@ All server routes utilize **Zod validation** for runtime safety. Payload transak
 * `GET /api/public/transactions`: Mengembalikan feed transaksi setelah login.
 * `GET /api/public/members`: Mengembalikan daftar ringan anggota aktif (`id`, `name`) setelah login; data dibatasi sesuai role.
 * `GET /api/public/members/:id`: Mengembalikan profil ringkas dan riwayat mutasi setelah login; `member` hanya boleh melihat datanya sendiri.
+
+### 3.1.1 Admin Audit Log
+
+* `GET /api/admin/audit-logs`: Mengembalikan log secara *read-only* untuk `admin`, diurutkan dari yang terbaru. Endpoint menerima filter sederhana `from`, `to`, `eventType`, `actorId`, serta `page` dan `limit` bila pagination diperlukan.
+* Endpoint mengembalikan waktu, jenis kejadian, ringkasan, pelaku, `targetType`, dan `targetId` bila ada. `metadataJson` tidak perlu dikirim jika tidak dibutuhkan oleh tampilan.
+* `member` dan `pengurus` menerima `403` untuk endpoint ini. Tidak ada endpoint `POST`, `PATCH`, atau `DELETE` untuk log.
 
 ### 3.2 Protected Mutation Routes (Better-Auth + Role Middleware)
 
@@ -184,6 +192,8 @@ Untuk `TRANSFER_ANTAR_REKENING`, service wajib memastikan kedua rekening manual 
 * `POST /api/admin/manual-accounts`: Menambahkan rekening manual baru.
 * `PATCH /api/admin/manual-accounts/:id`: Mengubah data atau status aktif rekening manual.
 * `DELETE /api/admin/manual-accounts/:id`: Menonaktifkan rekening manual yang sudah pernah digunakan; penghapusan fisik ditolak jika memiliki riwayat transaksi.
+
+Setiap endpoint mutasi di atas memanggil service log setelah hasil aksi diketahui. Minimal event yang digunakan adalah `TRANSACTION_CREATED`, `TRANSFER_CREATED`, `MANUAL_ACCOUNT_CREATED`, `MANUAL_ACCOUNT_UPDATED`, `USER_UPDATED`, `CONFIG_UPDATED`, dan `ACTION_REJECTED`. Route login juga mencatat `LOGIN_SUCCEEDED` atau `LOGIN_FAILED`, sedangkan route logout mencatat `LOGOUT`; kegagalan autentikasi dapat memiliki `actorId` kosong.
 
 
 

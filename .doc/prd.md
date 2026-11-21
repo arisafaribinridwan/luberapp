@@ -35,26 +35,35 @@ Aplikasi dibangun dengan standar modern *Full-Stack SSR/Edge Application* menggu
 7. **Physical Account Audit Trail**: Setiap transaksi menyimpan rekening manual yang menerima atau mengeluarkan dana sehingga jejak fisik kas dapat direkonsiliasi dengan jurnal Debit/Kredit.
 8. **Internal Fund Transfer**: Admin dapat memindahkan dana antar rekening pusat komunitas secara langsung dan setiap pemindahan dicatat sebagai transaksi yang dapat diaudit.
 9. **Emergency Deficit Coverage**: Saldo kas utama minus dicatat sebagai saldo awal/defisit yang terpisah. Dana hibah anggota dapat dialokasikan untuk menutup defisit tersebut terlebih dahulu; sisa hibah setelah penutupan dicatat sebagai tambahan modal hibah.
+10. **Admin Audit Log**: Kejadian penting aplikasi dicatat dalam log yang tidak dapat diubah atau dihapus. Log hanya dapat dibaca oleh `admin` untuk membantu pelacakan aktivitas dan perubahan data.
 
 ---
 
 ## 3. Authentication, Roles & Session Policy
 
-Semua pengguna aplikasi wajib login sebelum dapat mengakses halaman, dashboard, data, atau API aplikasi (selain endpoint login). Alur awal pengguna adalah: **buka alamat website → splash screen → login screen → halaman sesuai role**.
+Semua pengguna aplikasi wajib login sebelum dapat mengakses halaman, dashboard, data, atau API aplikasi (selain endpoint login). Alur awal pengguna adalah: **buka alamat website → splash screen → login screen → launchpad (`/`)**.
+
+Launchpad adalah halaman utama setelah login dan menjadi menu untuk masuk ke seluruh area aplikasi. Launchpad tidak menggantikan halaman fitur; launchpad menyediakan tautan menuju dashboard, transaksi, data anggota, pengaturan, dan Log Aktivitas sesuai role pengguna.
 
 ### 3.1 Role Pengguna
 
 | Role | Akses utama |
 | --- | --- |
-| `member` | Melihat dashboard, ringkasan saldo, feed transaksi, dan mutasi dirinya sendiri secara *read-only*. |
-| `pengurus` | Seluruh akses `member`, serta pencatatan dan pengelolaan transaksi operasional sesuai kewenangan organisasi. |
-| `admin` | Seluruh akses `pengurus`, serta pengelolaan pengguna, role, rekening manual, konfigurasi, dan seluruh operasi administrasi. |
+| `member` | Mengakses launchpad lalu melihat dashboard, ringkasan saldo, feed transaksi, dan mutasi dirinya sendiri secara *read-only*. |
+| `pengurus` | Mengakses launchpad lalu memakai seluruh akses `member`, serta pencatatan dan pengelolaan transaksi operasional sesuai kewenangan organisasi. |
+| `admin` | Mengakses launchpad lalu memakai seluruh akses `pengurus`, serta pengelolaan pengguna, role, rekening manual, konfigurasi, Log Aktivitas, dan seluruh operasi administrasi. |
 
 Role disimpan pada akun pengguna dan diverifikasi pada setiap route server. Tidak ada role anonim atau akses aplikasi tanpa session aktif; endpoint login adalah satu-satunya pengecualian untuk membuat session.
 
-### 3.2 Session
+### 3.2 Log Aktivitas Admin
 
-Session dikelola oleh `@nuxtjs/better-auth` dan berakhir setelah **1 jam tanpa aktivitas**. Setiap request atau interaksi terautentikasi yang valid memperbarui waktu aktivitas terakhir. Ketika session kedaluwarsa, pengguna diarahkan kembali ke login screen dan harus login ulang.
+Sistem menyimpan log untuk kejadian penting, yaitu login/logout, login yang gagal, pembuatan transaksi, transfer, perubahan rekening manual, perubahan pengguna atau role, serta perubahan konfigurasi. Setiap catatan menyimpan waktu, pelaku jika tersedia, jenis kejadian, ringkasan kejadian, dan ID data yang terdampak jika ada.
+
+Halaman dan endpoint log hanya tersedia untuk `admin`. `member` dan `pengurus` tidak menerima data log melalui UI maupun API. Log bersifat *append-only*: tidak ada fitur edit atau hapus, dan isi log tidak boleh menyimpan password, PIN, token, atau isi berkas bukti transaksi.
+
+### 3.3 Session
+
+Session dikelola oleh `@nuxtjs/better-auth` dan berakhir setelah **1 jam tanpa aktivitas**. Setiap request atau interaksi terautentikasi yang valid memperbarui waktu aktivitas terakhir. Ketika session kedaluwarsa, pengguna diarahkan kembali ke login screen dan harus login ulang sebelum kembali ke launchpad.
 
 ## 4. Technology Stack Specification
 
@@ -115,15 +124,15 @@ Hibah anggota dicatat dalam dua tahap: penerimaan dana ke rekening/kas dan aloka
 
 ## 6. Database & Data Model
 
-Definisi schema database, audit trail rekening manual, dan pengaturan daftar rekening manual dipisahkan dalam [database.md](database.md). Dokumen tersebut menjadi sumber detail struktur data dan aturan persistensi.
+Definisi schema database, audit trail rekening manual, log aktivitas admin, dan pengaturan daftar rekening manual dipisahkan dalam [database.md](database.md). Dokumen tersebut menjadi sumber detail struktur data dan aturan persistensi.
 
 ## 7. Application Flows
 
-Alur pengguna dan kebutuhan UX aplikasi dipisahkan dalam [flow.md](flow.md). Dokumen tersebut menjadi sumber detail untuk splash screen, login, dashboard terautentikasi, panel role, dan pemilihan rekening manual.
+Alur pengguna dan kebutuhan UX aplikasi dipisahkan dalam [flow.md](flow.md). Dokumen tersebut menjadi sumber detail untuk splash screen, login, launchpad, dashboard terautentikasi, panel role, dan pemilihan rekening manual.
 
 ## 8. Backend Specification
 
-Spesifikasi API, server routes, validasi payload, dan endpoint admin dipisahkan dalam [backend.md](backend.md). Dokumen tersebut menjadi sumber detail implementasi backend aplikasi.
+Spesifikasi API, server routes, validasi payload, log aktivitas, dan endpoint admin dipisahkan dalam [backend.md](backend.md). Dokumen tersebut menjadi sumber detail implementasi backend aplikasi.
 
 ## 9. Environment & Deployment Configurations
 
@@ -152,7 +161,7 @@ Berkas `.env` untuk lingkungan pengembangan dan produksi:
 
 ```env
 # Nuxt & App Config
-NUXT_PUBLIC_APP_NAME="Luber (Lunas Bersama)"
+NUXT_PUBLIC_APP_NAME="Luber - Lunas Bersama"
 BETTER_AUTH_SECRET="your-super-secret-better-auth-key"
 BETTER_AUTH_URL="http://localhost:3000" # https://luber.pages.dev di Production
 BETTER_AUTH_SESSION_IDLE_TIMEOUT=3600 # detik; session berakhir setelah 1 jam tanpa aktivitas
