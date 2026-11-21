@@ -49,5 +49,14 @@ export default defineNuxtConfig({
         braceStyle: '1tbs'
       }
     }
+  },
+
+  fonts: {
+    providers: {
+      google: false,
+      bunny: false,
+      fontsource: false,
+      fontshare: false
+    }
   }
 })

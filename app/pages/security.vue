@@ -1,12 +1,18 @@
+<script setup lang="ts">
+useSeoMeta({ title: 'Keamanan Akun | Luber' })
+</script>
+
 <template>
-  <main class="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-6 p-6">
-    <h1 class="text-3xl font-bold">
-      Keamanan akun
-    </h1>
-    <AuthTwoFactorSetup />
-    <NuxtLink
-      to="/"
-      class="text-primary"
-    >Kembali</NuxtLink>
-  </main>
+  <AppShell
+    title="Keamanan Akun"
+    subtitle="Autentikasi dua langkah & kredensial"
+    back-to="/"
+    back-label="Kembali ke Beranda"
+  >
+    <div class="px-5 py-6">
+      <div class="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs">
+        <AuthTwoFactorSetup />
+      </div>
+    </div>
+  </AppShell>
 </template>

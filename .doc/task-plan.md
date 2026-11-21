@@ -9,7 +9,7 @@
 - [design_guideline.md](design_guideline.md)
 - [nuxt-better-auth-libsql-drizzle-guide.md](nuxt-better-auth-libsql-drizzle-guide.md)
 
-**Status:** Task 1 dan Task 2 selesai; hasil audit awal ada di [task-1-baseline.md](task-1-baseline.md)
+**Status:** Task 1, Task 2, dan Task 3 selesai; hasil audit awal ada di [task-1-baseline.md](task-1-baseline.md)
 
 **Task list target:** Checklist dalam dokumen ini menjadi daftar kerja utama untuk implementasi aplikasi.
 
@@ -119,15 +119,15 @@ Audit baseline dan kontrak aplikasi
 
 **Acceptance criteria:**
 
-- [ ] Tidak ada launchpad, dashboard, atau data aplikasi yang tampil sebelum session valid.
-- [ ] Launchpad `/` menampilkan menu dashboard, transaksi, anggota, pengaturan, dan audit log sesuai role.
-- [ ] Shell nyaman di mobile dan memakai lebar terkontrol pada desktop.
-- [ ] Loading, session expired, dan error auth memiliki state yang jelas.
+- [x] Tidak ada launchpad, dashboard, atau data aplikasi yang tampil sebelum session valid.
+- [x] Launchpad `/` menampilkan menu dashboard, transaksi, anggota, pengaturan, dan audit log sesuai role.
+- [x] Shell nyaman di mobile dan memakai lebar terkontrol pada desktop.
+- [x] Loading, session expired, dan error auth memiliki state yang jelas.
 
 **Verification:**
 
-- [ ] Uji alur guest, member, pengurus, dan admin pada mobile serta desktop.
-- [ ] Uji refresh langsung pada `/` dan route fitur.
+- [x] Uji alur guest, member, pengurus, dan admin pada mobile serta desktop.
+- [x] Uji refresh langsung pada `/` dan route fitur.
 
 **Dependencies:** Task 2
 

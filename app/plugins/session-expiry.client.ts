@@ -7,7 +7,7 @@ export default defineNuxtPlugin(() => {
   async function checkSession() {
     try {
       await fetchSession({ force: true })
-      if (!loggedIn.value) await navigateTo('/')
+      if (!loggedIn.value) await navigateTo('/?expired=1')
     } catch {
       timer = setTimeout(checkSession, 15_000)
     }

@@ -7,6 +7,9 @@
 
 body {
   background-color: var(--ui-bg);
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 @media (min-width: 640px) {
@@ -15,22 +18,42 @@ body {
   }
 
   :root.dark body {
-    background-color: #111827;
+    background-color: #0F172A;
+  }
+}
+
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
   }
 }
 
 @theme static {
-  --font-sans: 'Public Sans', sans-serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
 
-  --color-green-50: #EFFDF5;
-  --color-green-100: #D9FBE8;
-  --color-green-200: #B3F5D1;
-  --color-green-300: #75EDAE;
-  --color-green-400: #00DC82;
-  --color-green-500: #00C16A;
-  --color-green-600: #00A155;
-  --color-green-700: #007F45;
-  --color-green-800: #016538;
-  --color-green-900: #0A5331;
-  --color-green-950: #052E16;
+  /* Brand Color: #2A41CB (Luber Royal Blue) */
+  --color-brand-50: #EEF2FF;
+  --color-brand-100: #E0E7FF;
+  --color-brand-200: #C7D2FE;
+  --color-brand-300: #A5B4FC;
+  --color-brand-400: #6366F1;
+  --color-brand-500: #4355E8;
+  --color-brand-600: #2A41CB;
+  --color-brand-700: #2234A5;
+  --color-brand-800: #1B2983;
+  --color-brand-900: #172269;
+  --color-brand-950: #0E143E;
+
+  --color-primary-50: var(--color-brand-50);
+  --color-primary-100: var(--color-brand-100);
+  --color-primary-200: var(--color-brand-200);
+  --color-primary-300: var(--color-brand-300);
+  --color-primary-400: var(--color-brand-400);
+  --color-primary-500: var(--color-brand-500);
+  --color-primary-600: var(--color-brand-600);
+  --color-primary-700: var(--color-brand-700);
+  --color-primary-800: var(--color-brand-800);
+  --color-primary-900: var(--color-brand-900);
+  --color-primary-950: var(--color-brand-950);
 }
