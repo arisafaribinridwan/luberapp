@@ -5,7 +5,6 @@ export default defineNuxtConfig({
     '@nuxt/ui',
     '@nuxtjs/better-auth',
     '@nuxtjs/eslint-module',
-    '@nuxtjs/tailwindcss',
     '@pinia/nuxt',
     '@vite-pwa/nuxt'
   ],
