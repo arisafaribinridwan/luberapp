@@ -171,7 +171,7 @@ import { sql } from 'drizzle-orm'
 // 1. Better-Auth Users Table (All Authenticated Users)
 export const users = sqliteTable('users', {
   id: text('id').primaryKey(),
-  username: text('username').notNull().unique(),
+  email: text('email').notNull().unique(),
   name: text('name').notNull(),
   role: text('role').default('member').notNull(), // member | pengurus | admin
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(CURRENT_TIMESTAMP)`),

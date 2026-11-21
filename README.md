@@ -12,7 +12,7 @@ pnpm db:migrate
 pnpm dev
 ```
 
-Server development tersedia di `http://localhost:3000`. Pendaftar baru mendapat role `member`. Login memakai email/password. Buat akun admin awal dengan `pnpm exec auth create-admin --config auth.ts` sebelum mengelola role melalui plugin Better Auth. Halaman `/security` menyediakan setup 2FA dengan kunci manual dan kode cadangan.
+Server development tersedia di `http://localhost:3000`. Login memakai email/password; pendaftaran mandiri dinonaktifkan. Buat akun admin awal dengan `pnpm exec auth create-admin --config auth.ts`, lalu buat pengguna di `/admin/users` (role awal `member`). Admin menetapkan password saat membuat akun. Jika pengguna lupa password, mereka perlu menghubungi admin. Halaman `/security` menyediakan setup 2FA dengan kunci manual dan kode cadangan.
 
 Jika schema auth berubah, jalankan `pnpm exec auth generate --config auth.ts --output server/database/schema/auth.ts -y`, lalu `pnpm db:generate` dan `pnpm db:migrate`. Migration yang sudah diterapkan harus dipertahankan sebagai riwayat.
 

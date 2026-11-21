@@ -4,6 +4,8 @@
 > Stack: **Nuxt 4**, modul **`@nuxtjs/better-auth`**, **Better Auth 1.7**, plugin **admin** (role & manajemen user) dan **two-factor** (TOTP + backup codes), database **SQLite lokal** lewat **`@libsql/client`**, dan **Drizzle ORM 1.0 RC** yang dikelola sendiri (tanpa NuxtHub).
 > Diperbarui 20 November 2026 berdasarkan dokumentasi Nuxt Better Auth, Better Auth, dan Drizzle.
 
+> **Kebijakan khusus Luber:** contoh signup publik dan route `/register` dalam panduan umum ini tidak berlaku untuk aplikasi Luber. Luber memakai login email/password, akun hanya dibuat admin dari panel pengguna, dan pengguna yang lupa password harus menghubungi admin. Aset logo login menggunakan `public/logo.svg`, sedangkan welcome screen menggunakan `public/brand.svg`.
+
 ---
 
 ## Daftar Isi
@@ -37,8 +39,9 @@
 
 **Fitur**
 
-- Register dan login email/password
-- Dua role bawaan: **`member`** (default untuk setiap pendaftar baru) dan **`admin`**
+- Login email/password
+- Akun dibuat admin melalui panel pengguna; tidak ada pendaftaran mandiri
+- Tiga role aplikasi: **`member`**, **`pengurus`**, dan **`admin`**
 - Halaman dan API yang dibatasi per role
 - Setup 2FA (TOTP + QR + backup codes), challenge 2FA saat login, trust device
 - Panel admin: daftar user (search + pagination), ubah role, ban/unban, revoke sesi
@@ -100,7 +103,6 @@ nuxt-auth-boilerplate/
 │  └─ pages/
 │     ├─ index.vue              ← launchpad utama setelah login
 │     ├─ login.vue
-│     ├─ register.vue
 │     ├─ two-factor.vue            ← challenge 2FA saat login
 │     ├─ dashboard/
 │     │  ├─ index.vue              ← dashboard (semua user login)
@@ -191,9 +193,9 @@ export default defineNuxtConfig({
 
   auth: {
     redirects: {
-      login: '/login',
-      authenticated: '/', // launchpad setelah sign in / sign up sukses
-      logout: '/login',
+      login: '/',
+      authenticated: '/', // launchpad setelah sign in sukses
+      logout: '/',
     },
     preserveRedirect: true, // tambahkan ?redirect=... saat dilempar ke /login
   },
@@ -201,8 +203,6 @@ export default defineNuxtConfig({
   routeRules: {
     // Hanya tamu (belum login)
     '/login': { auth: { only: 'guest', redirectTo: '/' } },
-    '/register': { auth: { only: 'guest', redirectTo: '/' } },
-
     // Semua user yang sudah login, apa pun rolenya
     '/': { auth: { only: 'user', redirectTo: '/login' } },
     '/dashboard/**': { auth: { only: 'user', redirectTo: '/login' } },
@@ -548,7 +548,7 @@ export function requireRole(event: H3Event, ...allowed: AppRole[]) {
 
 ## 13. Halaman-halaman UI
 
-Semua halaman memakai composable auto-import dari modul: `useUserSession`, `useSignIn`, `useSignUp`, `useSignOut`, `useAuthClient`, `runWithSessionRefresh`, serta `useRole` dari bagian 12.
+Semua halaman memakai composable auto-import dari modul: `useUserSession`, `useSignIn`, `useSignOut`, `useAuthClient`, `runWithSessionRefresh`, serta `useRole` dari bagian 12. `useSignUp` tidak dipakai karena signup publik dinonaktifkan.
 
 ### `app/app.vue`
 
@@ -565,43 +565,14 @@ Semua halaman memakai composable auto-import dari modul: `useUserSession`, `useS
   <main>
     <h1>Nuxt Auth Boilerplate</h1>
     <NuxtLink to="/login">Login</NuxtLink> |
-    <NuxtLink to="/register">Register</NuxtLink> |
     <NuxtLink to="/">Launchpad</NuxtLink>
   </main>
 </template>
 ```
 
-### `app/pages/register.vue`
+### `app/pages/admin/users.vue`
 
-Pendaftar baru otomatis mendapat role `member` (dari `defaultRole`).
-
-```vue
-<script setup lang="ts">
-const name = ref('')
-const email = ref('')
-const password = ref('')
-const { execute, status, error } = useSignUp('email')
-
-async function submit() {
-  // Setelah sukses & ter-autentikasi, otomatis redirect ke auth.redirects.authenticated
-  await execute({ name: name.value, email: email.value, password: password.value })
-}
-</script>
-
-<template>
-  <main>
-    <h1>Register</h1>
-    <form @submit.prevent="submit">
-      <input v-model="name" placeholder="Nama" required />
-      <input v-model="email" type="email" placeholder="Email" required />
-      <input v-model="password" type="password" placeholder="Password (min. 8)" required />
-      <button :disabled="status === 'pending'">Daftar</button>
-    </form>
-    <p v-if="error" role="alert">{{ error.message }}</p>
-    <NuxtLink to="/login">Sudah punya akun?</NuxtLink>
-  </main>
-</template>
-```
+Pengguna tidak mendaftar sendiri. Admin membuat akun melalui `admin.createUser`, memilih role, dan menetapkan password awal dari panel `/admin/users`.
 
 ### `app/pages/login.vue`
 
@@ -627,7 +598,7 @@ async function submit() {
       <button :disabled="status === 'pending'">Masuk</button>
     </form>
     <p v-if="error" role="alert">{{ error.message }}</p>
-    <NuxtLink to="/register">Buat akun</NuxtLink>
+    <p>Jika lupa password, hubungi admin.</p>
   </main>
 </template>
 ```
@@ -1085,20 +1056,15 @@ Hal yang sama bisa dipasang di route rules, misalnya mewajibkan admin memakai 2F
 
 ## 15. Membuat admin pertama
 
-Setiap pendaftar baru berperan `member`. Untuk membuat admin pertama:
-
-1. Daftar lewat `/register`.
-2. Ubah kolom `role` user tersebut menjadi `admin`. Pilih salah satu:
+Admin pertama dibuat melalui CLI. Setelah itu, admin membuat pengguna dan menetapkan role serta password melalui panel `/admin/users`:
 
 ```bash
-# Cara 1: Drizzle Studio (ubah kolom role di tabel user)
-npx drizzle-kit studio
-
-# Cara 2: CLI sqlite3 (jika terpasang)
-sqlite3 .data/sqlite.db "UPDATE \"user\" SET role = 'admin' WHERE email = 'email@anda.com';"
+pnpm exec auth create-admin --config auth.ts
 ```
 
-3. Sign out, lalu sign in lagi supaya sesi membawa role baru. Jika role belum berubah, panggil `fetchSession({ force: true })` atau login ulang.
+Untuk membuat admin pertama melalui CLI:
+
+Setelah admin pertama berhasil dibuat, sign out lalu sign in lagi supaya sesi membawa role admin. Jika role belum berubah, panggil `fetchSession({ force: true })` atau login ulang.
 
 Setelah ada satu admin, role user lain diubah dari halaman `/admin` lewat dropdown role.
 
@@ -1108,13 +1074,13 @@ Setelah ada satu admin, role user lain diubah dari halaman `/admin` lewat dropdo
 
 **Auth dan 2FA**
 
-1. Daftar user A, jadikan admin (bagian 15), lalu login. Anda diarahkan ke launchpad `/`.
+1. Buat admin pertama melalui CLI (bagian 15), buat user berikutnya dari `/admin/users`, lalu login. Anda diarahkan ke launchpad `/`.
 2. Buka `/security`, aktifkan 2FA, scan QR, simpan backup code, lalu konfirmasi kode. Status berubah menjadi "Aktif".
 3. Sign out lalu login lagi. Anda diarahkan ke `/two-factor`. Masukkan kode TOTP. Coba juga alur dengan backup code.
 
 **Role**
 
-4. Daftar user B (browser lain atau incognito). Cek di Drizzle Studio: `role` bernilai `member`.
+4. Buat user B dari `/admin/users` (browser lain atau incognito). Cek di Drizzle Studio: `role` sesuai pilihan admin.
 5. Login sebagai B (member): `/member` bisa dibuka, `/admin` diarahkan ke `/`, `GET /api/admin/stats` mengembalikan 403, dan `GET /api/member/me` berhasil.
 6. Login sebagai A (admin): `/member` dan `/admin` bisa dibuka, dan `GET /api/admin/stats` berhasil.
 7. Dari `/admin`, ubah role B menjadi `admin`, lalu kembalikan ke `member`. B harus login ulang agar perubahan role berlaku di sesinya.
@@ -1228,7 +1194,7 @@ Login sebagai admin, buka `/admin`, pilih `editor` pada dropdown role user yang 
 
 | Path | Siapa yang boleh | Mekanisme |
 | --- | --- | --- |
-| `/`, `/login`, `/register`, `/two-factor` | Publik (login/register: tamu saja) | `only: 'guest'` atau tanpa aturan |
+| `/`, `/login`, `/two-factor` | Publik (login: tamu saja) | `auth: false` atau `only: 'guest'` |
 | `/` dan area fitur terautentikasi | Semua user yang login | `only: 'user'` |
 | `/member/**` | member, admin | `role: ['member', 'admin']` |
 | `/editor/**` | editor, admin | `role: ['editor', 'admin']` |

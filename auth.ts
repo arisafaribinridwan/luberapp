@@ -9,7 +9,10 @@ import { ac, adminRoles, defaultRole, roles } from './shared/auth/permissions'
 export const auth = betterAuth({
   appName: 'Luber',
   database: drizzleAdapter(drizzle({ client, relations: schema.authRelations }), { provider: 'sqlite', schema }),
-  emailAndPassword: { enabled: true },
+  emailAndPassword: {
+    enabled: true,
+    disableSignUp: true
+  },
   session: {
     expiresIn: 60 * 60,
     updateAge: 0

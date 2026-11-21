@@ -50,6 +50,8 @@ Pola ini mengikuti struktur direktori Nuxt untuk menjaga auto-import berdasarkan
 * Role pengguna adalah `member`, `pengurus`, atau `admin`. Gunakan pemeriksaan terpusat seperti `requireRole(event, roles)` setelah session ditemukan.
 * `member` hanya dapat membaca dashboard dan data miliknya; `pengurus` dapat melakukan operasi transaksi yang diizinkan; `admin` memiliki akses penuh termasuk pengguna, role, rekening manual, dan konfigurasi.
 * Login berhasil melalui `POST /api/auth/login` mengarahkan client ke launchpad `/`. Session yang tidak valid mengarahkan client ke welcome screen `/`; API data tetap mengembalikan HTTP 401. Service worker hanya mencache asset shell dan response baca yang aman; response autentikasi, session, dan mutasi tidak boleh dicache.
+* Login menggunakan email dan password. Endpoint signup publik dinonaktifkan; hanya admin dapat membuat akun melalui endpoint admin Better Auth dan menetapkan password.
+* Pemulihan password dilakukan oleh admin setelah pengguna menghubungi admin. Aplikasi tidak mengirim tautan reset otomatis.
 * Log aktivitas hanya boleh dibaca oleh `admin`. Pemeriksaan role dilakukan di server pada setiap request log; menyembunyikan menu di client saja tidak cukup.
 
 ## 2. Backend Implementation Pattern
@@ -125,7 +127,7 @@ All server routes utilize **Zod validation** for runtime safety. Payload transak
 
 Semua endpoint di bawah `/api/admin` memerlukan session aktif. Operasi transaksi dapat diberikan kepada `pengurus` dan `admin` melalui middleware role; pembuatan transfer dan pengelolaan rekening manual hanya tersedia untuk `admin`.
 
-* `POST /api/auth/login`: Autentikasi semua role via username & password/PIN dan membuat session dengan idle timeout 1 jam.
+* `POST /api/auth/sign-in/email`: Autentikasi semua role via email dan password dan membuat session dengan idle timeout 1 jam.
 * `POST /api/admin/transactions`:
 * **Zod Payload Validation**:
 ```typescript

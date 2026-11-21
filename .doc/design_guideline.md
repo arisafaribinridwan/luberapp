@@ -71,6 +71,6 @@ Log aktivitas adalah menu khusus admin untuk membantu pelacakan. Gunakan tampila
 
 ## 5. Launchpad Utama
 
-Halaman `/` menampilkan welcome screen bagi pengunjung tanpa session dan launchpad setelah login. Welcome screen memakai `brand.svg` dan tombol Get Started menuju login. Launchpad menjadi menu utama aplikasi. Tampilkan kartu atau tautan menuju area yang boleh diakses role aktif, seperti dashboard, transaksi, anggota, pengaturan, dan Log Aktivitas untuk admin. Launchpad harus tetap ringkas, mobile-first, dan menyediakan akses kembali dari setiap area fitur.
+Halaman `/` menampilkan welcome screen bagi pengunjung tanpa session dan launchpad setelah login. Welcome screen memakai `brand.svg` dan tombol Get Started menuju login. Halaman login memakai `logo.svg`, yang sudah memuat logo dan slogan lengkap tanpa teks slogan tambahan. Pendaftaran mandiri tidak tersedia; admin membuat akun dan menetapkan password melalui panel pengguna. Jika lupa password, pengguna menghubungi admin. Launchpad menjadi menu utama aplikasi. Tampilkan kartu atau tautan menuju area yang boleh diakses role aktif, seperti dashboard, transaksi, anggota, pengaturan, dan Log Aktivitas untuk admin. Launchpad harus tetap ringkas, mobile-first, dan menyediakan akses kembali dari setiap area fitur.
 
 ---

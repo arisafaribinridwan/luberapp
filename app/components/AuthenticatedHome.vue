@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const { user } = useUserSession()
-const { role } = useRole()
+const { role, isAdmin } = useRole()
 const { execute: signOut, status } = useSignOut()
 </script>
 
@@ -17,6 +17,13 @@ const { execute: signOut, status } = useSignOut()
       class="text-primary"
     >
       Keamanan akun dan 2FA
+    </NuxtLink>
+    <NuxtLink
+      v-if="isAdmin"
+      to="/admin/users"
+      class="text-primary"
+    >
+      Kelola pengguna
     </NuxtLink>
     <button
       type="button"

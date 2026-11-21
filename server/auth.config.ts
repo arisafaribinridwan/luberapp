@@ -8,7 +8,10 @@ import { ac, adminRoles, defaultRole, roles } from '../shared/auth/permissions'
 export default defineServerAuth({
   appName: 'Luber',
   database: drizzleAdapter(db, { provider: 'sqlite', schema }),
-  emailAndPassword: { enabled: true },
+  emailAndPassword: {
+    enabled: true,
+    disableSignUp: true
+  },
   session: {
     expiresIn: 60 * 60,
     updateAge: 0
