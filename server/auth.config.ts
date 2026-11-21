@@ -1,5 +1,20 @@
 import { defineServerAuth } from '@nuxtjs/better-auth/config'
+import { drizzleAdapter } from '@better-auth/drizzle-adapter/relations-v2'
+import { admin, twoFactor } from 'better-auth/plugins'
+import { db } from './database'
+import * as schema from './database/schema/auth'
+import { ac, adminRoles, defaultRole, roles } from '../shared/auth/permissions'
 
 export default defineServerAuth({
-  emailAndPassword: { enabled: true }
+  appName: 'Luber',
+  database: drizzleAdapter(db, { provider: 'sqlite', schema }),
+  emailAndPassword: { enabled: true },
+  session: {
+    expiresIn: 60 * 60,
+    updateAge: 0
+  },
+  plugins: [
+    admin({ ac, roles, defaultRole, adminRoles }),
+    twoFactor()
+  ]
 })

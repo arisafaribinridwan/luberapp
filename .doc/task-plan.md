@@ -9,7 +9,7 @@
 - [design_guideline.md](design_guideline.md)
 - [nuxt-better-auth-libsql-drizzle-guide.md](nuxt-better-auth-libsql-drizzle-guide.md)
 
-**Status:** Task 1 selesai; hasil audit ada di [task-1-baseline.md](task-1-baseline.md)
+**Status:** Task 1 dan Task 2 selesai; hasil audit awal ada di [task-1-baseline.md](task-1-baseline.md)
 
 **Task list target:** Checklist dalam dokumen ini menjadi daftar kerja utama untuk implementasi aplikasi.
 
@@ -22,7 +22,7 @@ Kondisi kode saat ini masih berupa starter Nuxt UI dengan konfigurasi Better Aut
 ## Keputusan arsitektur
 
 - Gunakan Nuxt 4, Vue Composition API dengan `<script setup lang="ts">`, Nuxt UI, TypeScript strict, Zod, Drizzle ORM, SQLite lokal, dan Turso LibSQL di production.
-- Semua halaman dan endpoint aplikasi memerlukan session Better Auth; endpoint login adalah pengecualian.
+- Semua halaman fitur dan endpoint data aplikasi memerlukan session Better Auth; welcome screen dan halaman autentikasi dapat diakses tanpa session.
 - Role terpusat sebagai `member`, `pengurus`, dan `admin`. Pemeriksaan role dilakukan di server menggunakan helper bersama; route rules hanya membantu UX.
 - Gunakan struktur modular `server/database/schema/` dan satu export `databaseSchema` serta relations terpusat.
 - Pisahkan layer API route, service, dan repository. Route tidak berisi aturan bisnis atau query Drizzle yang kompleks.
@@ -95,15 +95,15 @@ Audit baseline dan kontrak aplikasi
 
 **Acceptance criteria:**
 
-- [ ] Role `member`, `pengurus`, dan `admin` didefinisikan sekali dan dipakai server, client, serta CLI auth.
-- [ ] Semua route aplikasi mengarahkan guest ke login; login berhasil mengarah ke `/`; halaman admin dan fitur pengurus memakai role guard.
-- [ ] Session berakhir setelah satu jam tanpa aktivitas dan user diarahkan ke login.
-- [ ] Server menolak request tanpa session atau dengan role yang tidak sesuai.
+- [x] Role `member`, `pengurus`, dan `admin` didefinisikan sekali dan dipakai server, client, serta CLI auth.
+- [x] Route terlindungi mengarahkan guest ke welcome screen `/`; login berhasil mengarah ke `/`; halaman admin dan fitur pengurus memakai role guard.
+- [x] Session berakhir setelah satu jam tanpa aktivitas dan user diarahkan ke welcome screen.
+- [x] Server menolak request tanpa session atau dengan role yang tidak sesuai.
 
 **Verification:**
 
-- [ ] Uji login, logout, register, user per role, role tidak sesuai, session expired, dan akses API langsung.
-- [ ] Jalankan build/typecheck.
+- [x] Uji login, logout, register, user per role, role tidak sesuai, session expired, dan akses API langsung.
+- [x] Jalankan build/typecheck.
 
 **Dependencies:** Task 1
 
@@ -113,7 +113,7 @@ Audit baseline dan kontrak aplikasi
 
 ### Task 3: Bangun splash screen, launchpad, dan application shell
 
-**Description:** Ganti halaman starter dengan alur splash → pemeriksaan session → login atau launchpad. Buat shell navigasi mobile-first dengan menu berbeda berdasarkan role dan tautan kembali ke launchpad dari setiap area.
+**Description:** Ganti halaman starter dengan alur pemeriksaan session → welcome screen atau launchpad. Tombol Get Started membuka login. Buat shell navigasi mobile-first dengan menu berbeda berdasarkan role dan tautan kembali ke launchpad dari setiap area.
 
 **Acceptance criteria:**
 

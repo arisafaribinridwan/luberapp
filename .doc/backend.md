@@ -49,7 +49,7 @@ Pola ini mengikuti struktur direktori Nuxt untuk menjaga auto-import berdasarkan
 * Session berakhir setelah 1 jam tanpa aktivitas. Middleware memperbarui aktivitas pada request terautentikasi dan mengembalikan HTTP 401 saat idle timeout terlewati.
 * Role pengguna adalah `member`, `pengurus`, atau `admin`. Gunakan pemeriksaan terpusat seperti `requireRole(event, roles)` setelah session ditemukan.
 * `member` hanya dapat membaca dashboard dan data miliknya; `pengurus` dapat melakukan operasi transaksi yang diizinkan; `admin` memiliki akses penuh termasuk pengguna, role, rekening manual, dan konfigurasi.
-* Login berhasil melalui `POST /api/auth/login` mengarahkan client ke launchpad `/`. Session yang tidak valid mengarahkan client ke login screen. Service worker hanya mencache asset shell dan response baca yang aman; response autentikasi, session, dan mutasi tidak boleh dicache.
+* Login berhasil melalui `POST /api/auth/login` mengarahkan client ke launchpad `/`. Session yang tidak valid mengarahkan client ke welcome screen `/`; API data tetap mengembalikan HTTP 401. Service worker hanya mencache asset shell dan response baca yang aman; response autentikasi, session, dan mutasi tidak boleh dicache.
 * Log aktivitas hanya boleh dibaca oleh `admin`. Pemeriksaan role dilakukan di server pada setiap request log; menyembunyikan menu di client saja tidak cukup.
 
 ## 2. Backend Implementation Pattern

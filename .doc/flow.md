@@ -13,11 +13,11 @@ Semua pengguna wajib melewati alur berikut:
 1. Pengguna membuka alamat website.
 2. Aplikasi menampilkan **splash screen** untuk memuat konfigurasi dan memeriksa session.
 3. Jika session aktif dan belum idle selama 1 jam, aplikasi membuka launchpad di `/`.
-4. Jika tidak ada session atau session sudah kedaluwarsa, aplikasi menampilkan **login screen**.
-5. Setelah login berhasil, pengguna diarahkan ke **launchpad di `/`**.
-6. Setelah 1 jam tanpa aktivitas, session dihapus/dianggap kedaluwarsa dan pengguna dikembalikan ke login screen.
+4. Jika tidak ada session atau session sudah kedaluwarsa, aplikasi menampilkan **welcome screen di `/`**.
+5. Tombol **Get Started** di welcome screen membuka login screen; setelah login berhasil, pengguna diarahkan ke **launchpad di `/`**.
+6. Setelah 1 jam tanpa aktivitas, session dihapus/dianggap kedaluwarsa dan pengguna dikembalikan ke welcome screen.
 
-Tidak ada launchpad, dashboard, data, atau operasi aplikasi yang dapat diakses sebelum login. Saat offline, PWA hanya menampilkan shell atau halaman cache yang aman; pembacaan data terbaru dan seluruh operasi transaksi tetap memerlukan koneksi serta session aktif.
+Tidak ada launchpad, dashboard, data, atau operasi aplikasi yang dapat diakses sebelum login. Welcome screen dapat diakses tanpa session. Saat offline, PWA hanya menampilkan shell atau halaman cache yang aman; pembacaan data terbaru dan seluruh operasi transaksi tetap memerlukan koneksi serta session aktif.
 
 ### 1.1 Role-Based Navigation
 
