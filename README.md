@@ -9,12 +9,22 @@ Gunakan Node.js 20 atau lebih baru dan pnpm versi yang tertera di `package.json`
 ```bash
 pnpm install
 pnpm db:migrate
+pnpm db:seed
 pnpm dev
 ```
 
 Server development tersedia di `http://localhost:3000`. Login memakai email/password; pendaftaran mandiri dinonaktifkan. Buat akun admin awal dengan `pnpm exec auth create-admin --config auth.ts`, lalu buat pengguna di `/admin/users` (role awal `member`). Admin menetapkan password saat membuat akun. Jika pengguna lupa password, mereka perlu menghubungi admin. Halaman `/security` menyediakan setup 2FA dengan kunci manual dan kode cadangan.
 
 Jika schema auth berubah, jalankan `pnpm exec auth generate --config auth.ts --output server/database/schema/auth.ts -y`, lalu `pnpm db:generate` dan `pnpm db:migrate`. Migration yang sudah diterapkan harus dipertahankan sebagai riwayat.
+
+Untuk database Turso, set `DATABASE_URL` ke URL `libsql://...` dan `DATABASE_AUTH_TOKEN` ke token database, lalu jalankan migration dan seed dari environment yang memiliki akses ke database:
+
+```bash
+DATABASE_URL=libsql://nama-db.turso.io DATABASE_AUTH_TOKEN=... pnpm db:migrate
+DATABASE_URL=libsql://nama-db.turso.io DATABASE_AUTH_TOKEN=... pnpm db:seed
+```
+
+`pnpm db:seed` aman dijalankan berulang kali. Rekening awal diidentifikasi oleh nama unik dan baris yang sudah ada tidak ditimpa.
 
 ## Verifikasi
 

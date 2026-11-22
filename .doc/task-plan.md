@@ -194,15 +194,15 @@ Audit baseline dan kontrak aplikasi
 
 **Acceptance criteria:**
 
-- [ ] Migration dapat diterapkan pada SQLite lokal tanpa kehilangan user/session valid.
-- [ ] Foreign key, index, unique constraint, dan kolom audit diterapkan sesuai database design.
-- [ ] Seed rekening awal seperti BCA Bendahara, Mandiri Ketua, dan Kas Tunai tidak menggandakan data saat dijalankan ulang.
-- [ ] Prosedur migration Turso terdokumentasi.
+- [x] Migration dapat diterapkan pada SQLite lokal tanpa kehilangan user/session valid.
+- [x] Foreign key, index, unique constraint, dan kolom audit diterapkan sesuai database design.
+- [x] Seed rekening awal seperti BCA Bendahara, Mandiri Ketua, dan Kas Tunai tidak menggandakan data saat dijalankan ulang.
+- [x] Prosedur migration Turso terdokumentasi.
 
 **Verification:**
 
-- [ ] Uji migration pada database kosong dan database berisi auth.
-- [ ] Jalankan seed dua kali dan bandingkan hasilnya.
+- [x] Uji migration pada database kosong dan database berisi auth.
+- [x] Jalankan seed dua kali dan bandingkan hasilnya.
 
 **Dependencies:** Task 5
 
@@ -234,8 +234,8 @@ Audit baseline dan kontrak aplikasi
 
 ### Checkpoint: Database dan audit
 
-- [ ] Schema modular dan migration lulus pada SQLite.
-- [ ] Seed idempotent.
+- [x] Schema modular dan migration lulus pada SQLite.
+- [x] Seed idempotent.
 - [ ] Audit log append-only tersimpan untuk event penting.
 - [ ] Tidak ada endpoint aplikasi yang melewati session guard.
 
