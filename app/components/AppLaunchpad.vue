@@ -4,272 +4,233 @@ const { role, hasRole, isAdmin } = useRole()
 const { execute: signOut, status: signOutStatus } = useSignOut()
 
 interface MenuItem {
-  title: string
-  description: string
+  id: string
+  label: string
   to: string
   icon: string
-  iconColor: string
-  iconBg: string
-  badge?: string
-  badgeClass?: string
+  tone: 'brand' | 'in' | 'out'
   visible: boolean
 }
 
-const roleBadge = computed(() => {
+const roleDisplay = computed(() => {
   switch (role.value) {
     case 'admin':
-      return {
-        label: 'Administrator',
-        icon: 'i-lucide-shield-check',
-        class: 'bg-indigo-50 text-[#2A41CB] border-indigo-200'
-      }
+      return { label: 'Admin', initials: 'AD' }
     case 'pengurus':
-      return {
-        label: 'Pengurus',
-        icon: 'i-lucide-badge-check',
-        class: 'bg-emerald-50 text-emerald-700 border-emerald-200'
-      }
+      return { label: 'Pengurus', initials: 'PG' }
     case 'member':
     default:
-      return {
-        label: 'Anggota',
-        icon: 'i-lucide-user',
-        class: 'bg-blue-50 text-blue-700 border-blue-200'
-      }
+      return { label: 'Member', initials: 'MB' }
   }
+})
+
+const userInitials = computed(() => {
+  const name = user.value?.name?.trim()
+  if (!name) return roleDisplay.value.initials
+
+  return name
+    .split(/\s+/)
+    .slice(0, 2)
+    .map(part => part.charAt(0))
+    .join('')
+    .toUpperCase()
 })
 
 const menuItems = computed<MenuItem[]>(() => [
   {
-    title: 'Dashboard Keuangan',
-    description: 'Ringkasan Kas Utama, piutang, modal hibah, dan status pemulihan defisit.',
+    id: 'dashboard',
+    label: 'Dashboard',
     to: '/dashboard',
-    icon: 'i-lucide-layout-dashboard',
-    iconColor: 'text-[#2A41CB]',
-    iconBg: 'bg-blue-50',
+    icon: 'i-lucide-chart-pie',
+    tone: 'brand',
     visible: true
   },
   {
-    title: 'Pencatatan Transaksi',
-    description: 'Input kas masuk, kas keluar, dan mutasi operasional dengan bukti fisik.',
+    id: 'members',
+    label: 'Mutasi',
+    to: '/members',
+    icon: 'i-lucide-id-card',
+    tone: 'brand',
+    visible: true
+  },
+  {
+    id: 'transactions',
+    label: 'Transaksi',
     to: '/transactions',
-    icon: 'i-lucide-wallet',
-    iconColor: 'text-emerald-600',
-    iconBg: 'bg-emerald-50',
-    badge: 'Pengurus & Admin',
-    badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    icon: 'i-lucide-wallet-cards',
+    tone: 'in',
     visible: hasRole('pengurus', 'admin')
   },
   {
-    title: 'Data & Mutasi Anggota',
-    description: 'Pencarian anggota, catatan simpanan bersih, dan sisa saldo pinjaman tanpa riba.',
-    to: '/members',
-    icon: 'i-lucide-users',
-    iconColor: 'text-sky-600',
-    iconBg: 'bg-sky-50',
-    visible: true
-  },
-  {
-    title: 'Transfer Antar Rekening',
-    description: 'Pemindahan dana internal antar rekening manual komunitas secara atomik.',
+    id: 'transfers',
+    label: 'Transfer',
     to: '/transfers',
     icon: 'i-lucide-arrow-left-right',
-    iconColor: 'text-amber-600',
-    iconBg: 'bg-amber-50',
-    badge: 'Admin',
-    badgeClass: 'bg-amber-50 text-amber-700 border-amber-200',
+    tone: 'brand',
     visible: isAdmin.value
   },
   {
-    title: 'Rekening Manual',
-    description: 'Kelola daftar rekening bank fisik, kas tunai operasional, dan status aktif.',
+    id: 'accounts',
+    label: 'Rekening',
     to: '/settings/manual-accounts',
-    icon: 'i-lucide-credit-card',
-    iconColor: 'text-indigo-600',
-    iconBg: 'bg-indigo-50',
-    badge: 'Admin',
-    badgeClass: 'bg-indigo-50 text-[#2A41CB] border-indigo-200',
+    icon: 'i-lucide-landmark',
+    tone: 'brand',
     visible: isAdmin.value
   },
   {
-    title: 'Kelola Pengguna',
-    description: 'Pendaftaran akun baru dan penetapan hak akses role anggota, pengurus, atau admin.',
+    id: 'users',
+    label: 'Pengguna',
     to: '/admin/users',
-    icon: 'i-lucide-user-plus',
-    iconColor: 'text-cyan-600',
-    iconBg: 'bg-cyan-50',
-    badge: 'Admin',
-    badgeClass: 'bg-cyan-50 text-cyan-700 border-cyan-200',
+    icon: 'i-lucide-users-round',
+    tone: 'brand',
     visible: isAdmin.value
   },
   {
-    title: 'Log Aktivitas',
-    description: 'Audit trail append-only seluruh kejadian, mutasi, dan aktivitas penting sistem.',
+    id: 'audit-logs',
+    label: 'Aktivitas',
     to: '/admin/audit-logs',
     icon: 'i-lucide-clipboard-list',
-    iconColor: 'text-slate-700',
-    iconBg: 'bg-slate-100',
-    badge: 'Admin',
-    badgeClass: 'bg-slate-100 text-slate-700 border-slate-300',
+    tone: 'brand',
     visible: isAdmin.value
   },
   {
-    title: 'Keamanan Akun & 2FA',
-    description: 'Pengaturan verifikasi dua langkah dan keamanan kredensial akun Anda.',
+    id: 'security',
+    label: 'Keamanan',
     to: '/security',
     icon: 'i-lucide-shield-check',
-    iconColor: 'text-teal-600',
-    iconBg: 'bg-teal-50',
+    tone: 'brand',
     visible: true
   }
 ])
+
+const visibleMenuItems = computed(() => menuItems.value.filter(item => item.visible))
+
+const memberNotice = computed(() => role.value === 'member')
+
+const menuToneClasses = (tone: MenuItem['tone']) => ({
+  brand: 'border-brand-100 bg-brand-50 text-brand-600 group-hover:border-brand-600 group-hover:bg-brand-600 group-hover:text-white group-focus-visible:border-brand-600 group-focus-visible:bg-brand-600 group-focus-visible:text-white',
+  in: 'border-emerald-100 bg-emerald-50 text-emerald-600 group-hover:border-emerald-600 group-hover:bg-emerald-600 group-hover:text-white group-focus-visible:border-emerald-600 group-focus-visible:bg-emerald-600 group-focus-visible:text-white',
+  out: 'border-rose-100 bg-rose-50 text-rose-600 group-hover:border-rose-600 group-hover:bg-rose-600 group-hover:text-white group-focus-visible:border-rose-600 group-focus-visible:bg-rose-600 group-focus-visible:text-white'
+}[tone])
 </script>
 
 <template>
-  <div class="flex min-h-dvh flex-col bg-[#F7F8FA] pb-24 text-[#0C2541]">
-    <!-- Top Header Profile Section -->
-    <header class="border-b border-slate-200/80 bg-white px-5 pt-6 pb-5 shadow-xs">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <img
-            src="/logo.svg"
-            alt="Luber, Lunas Bersama"
-            class="h-8 w-auto"
+  <main class="relative flex flex-1 min-h-full w-full overflow-hidden bg-[#1c2868]">
+    <div
+      class="absolute inset-0 overflow-hidden bg-[linear-gradient(170deg,rgb(10_25_58/70%)_0%,rgb(24_54_112/64%)_45%,rgb(5_12_30/92%)_100%),url('/donny-jiang-42gFAgdIUC8-unsplash.jpg')] bg-cover bg-center"
+      aria-hidden="true"
+    />
+
+    <div class="relative z-10 flex min-h-0 w-full flex-1 flex-col overflow-hidden">
+      <header class="flex items-center justify-between gap-3 px-5 pb-2 pt-5 md:pt-6 max-[365px]:px-4">
+        <div class="flex min-w-0 items-center gap-3 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 pl-1.5 text-white shadow-[0_12px_30px_rgb(14_20_64/12%)] backdrop-blur-[14px]">
+          <div
+            class="grid size-9 shrink-0 place-items-center rounded-full bg-white text-[0.7rem] font-extrabold text-brand-600"
+            aria-hidden="true"
           >
+            {{ userInitials }}
+          </div>
+          <div class="min-w-0 leading-[1.2]">
+            <p class="m-0 max-w-40 truncate text-sm font-bold">
+              {{ user?.name || 'Sahabat Luber' }}
+            </p>
+            <p class="m-0 mt-0.5 truncate text-[0.6875rem] font-semibold text-[#dfe5fc]">
+              {{ roleDisplay.label }}
+            </p>
+          </div>
         </div>
+
         <button
           type="button"
-          class="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600 active:scale-95 disabled:opacity-50"
+          class="inline-flex h-11 shrink-0 items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 text-[0.8125rem] font-bold text-white shadow-[0_12px_30px_rgb(14_20_64/12%)] backdrop-blur-[14px] transition-[background-color,transform,opacity] duration-150 hover:bg-white/20 active:scale-[0.96] disabled:cursor-wait disabled:opacity-[0.65] motion-reduce:transition-none max-[365px]:px-3"
           :disabled="signOutStatus === 'pending'"
           @click="signOut()"
         >
+          <span>{{ signOutStatus === 'pending' ? 'Keluar...' : 'Keluar' }}</span>
           <UIcon
             name="i-lucide-log-out"
-            class="size-3.5"
+            class="size-4"
           />
-          <span>{{ signOutStatus === 'pending' ? 'Keluar...' : 'Keluar' }}</span>
         </button>
-      </div>
+      </header>
 
-      <!-- User Greeting & Role Badge -->
-      <div class="mt-5 flex items-center justify-between">
-        <div>
-          <p class="text-xs font-medium text-slate-500">
-            Assalamu’alaikum,
-          </p>
-          <h1 class="text-lg font-bold text-[#0C2541]">
-            {{ user?.name || 'Sahabat Luber' }}
-          </h1>
-          <p class="text-xs text-slate-400">
-            {{ user?.email }}
-          </p>
-        </div>
-
-        <div
-          class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold shadow-2xs"
-          :class="roleBadge.class"
+      <section
+        class="flex min-h-0 flex-1 flex-col items-center justify-center px-6 pb-8 pt-7 text-center animate-logo-in motion-reduce:animate-none"
+        aria-labelledby="launchpad-title"
+      >
+        <img
+          src="/logo-dark-bg.svg"
+          alt="Luber, Lunas Bersama"
+          class="size-64 object-contain"
         >
-          <UIcon
-            :name="roleBadge.icon"
-            class="size-3.5"
-          />
-          <span>{{ roleBadge.label }}</span>
-        </div>
-      </div>
-    </header>
+      </section>
 
-    <!-- Ta'awun & Trust Card -->
-    <div class="px-4 pt-4">
-      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#2A41CB] to-[#1C2B85] p-4 text-white shadow-md shadow-[#2A41CB]/20">
-        <div class="relative z-10 flex flex-col gap-1">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold tracking-wider text-blue-200 uppercase">
-              Prinsip Ta’awun & Nir-Riba
-            </span>
-            <span class="rounded bg-white/15 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-xs">
-              Komunitas
-            </span>
-          </div>
-          <h2 class="text-sm font-bold text-white">
-            Pencatatan Keuangan Terbuka & Amanah
+      <section
+        class="mt-auto shrink-0 rounded-t-4xl bg-white px-5 pb-5 pt-6 shadow-[0_-20px_60px_rgb(14_20_64/42%)] animate-sheet-in motion-reduce:animate-none max-[365px]:px-4"
+        aria-labelledby="menu-title"
+      >
+        <div class="mb-5 flex items-baseline justify-between gap-4">
+          <h2
+            id="menu-title"
+            class="m-0 text-base font-extrabold text-slate-900"
+          >
+            Menu utama
           </h2>
-          <p class="mt-0.5 text-xs leading-relaxed text-blue-100">
-            Setiap rupiah dicatat dengan teliti berpasangan (double-entry), tanpa bunga, denda, atau penalti.
-          </p>
+          <span class="text-[0.6875rem] font-semibold text-slate-500">Pilih layanan</span>
         </div>
-        <!-- Decorative background shapes -->
-        <div class="absolute -right-6 -bottom-8 size-28 rounded-full bg-white/10 blur-xl pointer-events-none" />
-      </div>
-    </div>
 
-    <!-- Launchpad Menu Navigation Section -->
-    <div class="px-4 pt-5">
-      <div class="mb-3 flex items-center justify-between">
-        <h3 class="text-xs font-bold tracking-wider text-slate-500 uppercase">
-          Menu Aplikasi
-        </h3>
-        <span class="text-[11px] font-medium text-slate-400">
-          Akses berdasarkan role
-        </span>
-      </div>
-
-      <div class="grid grid-cols-1 gap-3">
-        <NuxtLink
-          v-for="item in menuItems.filter(i => i.visible)"
-          :key="item.to"
-          :to="item.to"
-          class="group flex items-center justify-between rounded-xl border border-slate-200/90 bg-white p-3.5 shadow-2xs transition-all duration-200 hover:border-[#2A41CB]/40 hover:shadow-sm active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-[#2A41CB]"
+        <nav
+          class="grid grid-cols-4 gap-x-2 gap-y-5"
+          aria-label="Menu utama aplikasi"
         >
-          <div class="flex items-center gap-3.5">
-            <div
-              class="flex size-11 shrink-0 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-105"
-              :class="[item.iconBg, item.iconColor]"
+          <NuxtLink
+            v-for="item in visibleMenuItems"
+            :key="item.id"
+            :to="item.to"
+            class="group flex min-w-0 flex-col items-center gap-2 rounded-2xl p-1 no-underline outline-none [-webkit-tap-highlight-color:transparent] focus-visible:shadow-[0_0_0_2px_#2a41cb,0_0_0_4px_white]"
+          >
+            <span
+              class="grid size-14 place-items-center rounded-2xl border transition-[background-color,border-color,color,transform] duration-150 group-hover:-translate-y-0.5 group-focus-visible:-translate-y-0.5 motion-reduce:transition-none max-[365px]:size-13"
+              :class="menuToneClasses(item.tone)"
             >
               <UIcon
                 :name="item.icon"
                 class="size-6"
+                aria-hidden="true"
               />
-            </div>
+            </span>
+            <span class="max-w-21 text-center text-[0.6875rem] font-bold leading-[1.15] text-slate-700">{{ item.label }}</span>
+          </NuxtLink>
+        </nav>
 
-            <div class="flex flex-col">
-              <div class="flex items-center gap-2">
-                <span class="text-sm font-bold text-[#0C2541] transition-colors group-hover:text-[#2A41CB]">
-                  {{ item.title }}
-                </span>
-                <span
-                  v-if="item.badge"
-                  class="rounded border px-1.5 py-0.5 text-[10px] font-semibold"
-                  :class="item.badgeClass"
-                >
-                  {{ item.badge }}
-                </span>
-              </div>
-              <p class="mt-0.5 text-xs text-slate-500 line-clamp-1">
-                {{ item.description }}
-              </p>
-            </div>
-          </div>
+        <p
+          v-if="memberNotice"
+          class="m-0 mt-5 rounded-xl bg-brand-50 px-3 py-2.5 text-center text-[0.6875rem] font-semibold leading-[1.45] text-brand-800"
+        >
+          Transaksi dikelola oleh pengurus komunitas. Anda dapat melihat dashboard dan mutasi.
+        </p>
 
-          <div class="shrink-0 text-slate-300 transition-colors group-hover:translate-x-0.5 group-hover:text-[#2A41CB]">
-            <UIcon
-              name="i-lucide-chevron-right"
-              class="size-5"
-            />
-          </div>
-        </NuxtLink>
-      </div>
+        <p class="m-0 mt-6 text-center text-[0.6875rem] font-semibold leading-[1.45] text-slate-400">
+          LuberApp v1.0
+        </p>
+
+        <p class="m-0 mt-3 text-center text-[0.5625rem] leading-[1.4] text-slate-400">
+          Photo by
+          <a
+            href="https://unsplash.com/@dotnny?utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditCopyText"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="underline underline-offset-2"
+          >Donny Jiang</a>
+          on
+          <a
+            href="https://unsplash.com/photos/low-angle-photo-of-high-rise-buildings-under-white-sky-42gFAgdIUC8?utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditCopyText"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="underline underline-offset-2"
+          >Unsplash</a>
+        </p>
+      </section>
     </div>
-
-    <!-- Bottom Watermark & Brand Reminder -->
-    <div class="mt-8 flex flex-col items-center justify-center px-4 text-center">
-      <img
-        src="/brand.svg"
-        alt="Luber"
-        class="h-10 w-auto opacity-40 grayscale"
-      >
-      <p class="mt-2 text-[11px] font-medium text-slate-400">
-        Lunas Bersama • Hidup Bebas Hutang Dan Riba
-      </p>
-    </div>
-  </div>
+  </main>
 </template>
