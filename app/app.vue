@@ -24,5 +24,6 @@ useSeoMeta({
     <div class="mx-auto my-0 min-h-dvh w-full max-w-md sm:max-w-lg bg-[#F7F8FA] shadow-xl sm:border-x sm:border-slate-200/80 flex flex-col">
       <NuxtPage />
     </div>
+    <PwaUpdateNotice />
   </UApp>
 </template>

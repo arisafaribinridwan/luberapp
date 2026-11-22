@@ -141,10 +141,10 @@ Audit baseline dan kontrak aplikasi
 
 **Acceptance criteria:**
 
-- [ ] Manifest memuat nama, short name, icon, start URL, display standalone, dan warna tema.
-- [ ] Service worker dapat meng-cache asset shell dan menyediakan fallback yang aman.
-- [ ] Endpoint session, data sensitif, dan mutation tidak dicache atau dijalankan offline.
-- [ ] Aplikasi dapat di-install melalui HTTPS production.
+- [x] Manifest memuat nama, short name, icon, start URL, display standalone, dan warna tema.
+- [x] Service worker dapat meng-cache asset shell dan menyediakan fallback yang aman.
+- [x] Endpoint session, data sensitif, dan mutation tidak dicache atau dijalankan offline.
+- [x] Aplikasi dapat di-install melalui HTTPS production.
 
 **Verification:**
 
