@@ -168,23 +168,23 @@ Audit baseline dan kontrak aplikasi
 
 ### Task 5: Modularisasi schema auth dan domain keuangan
 
-**Description:** Pecah schema auth yang ada ke modul sesuai guide, lalu tambahkan tabel member, manual account, transaction, dan audit log. Tambahkan relations terpusat, infer types, dan constants domain.
+**Description:** Pertahankan schema auth yang ada di `auth.ts`, lalu tambahkan tabel member, manual account, transaction, dan audit log dengan file schema domain terpisah. Tambahkan relations terpusat, infer types, dan constants domain.
 
 **Acceptance criteria:**
 
-- [ ] `server/database/schema/index.ts` mengekspor tabel, `databaseSchema`, dan relations.
-- [ ] Schema memuat role, tipe transaksi termasuk `TRANSFER_ANTAR_REKENING`, tujuan hibah, field defisit, rekening fisik, attachment, actor, dan timestamp.
-- [ ] `audit_logs` memiliki event type, actor, target, ringkasan, metadata aman, dan append-only policy.
-- [ ] Tipe server tidak diimpor dari client/shared; DTO yang dipakai dua sisi berada di `shared/types/`.
+- [x] `server/database/schema/index.ts` mengekspor tabel, `databaseSchema`, dan relations.
+- [x] Schema memuat role, tipe transaksi termasuk `TRANSFER_ANTAR_REKENING`, tujuan hibah, field defisit, rekening fisik, attachment, actor, dan timestamp.
+- [x] `audit_logs` memiliki event type, actor, target, ringkasan, metadata aman, dan append-only policy.
+- [x] Tipe server tidak diimpor dari client/shared; DTO yang dipakai dua sisi berada di `shared/types/`.
 
 **Verification:**
 
-- [ ] Jalankan typecheck dan build.
+- [x] Jalankan typecheck dan build.
 - [ ] Jalankan query sederhana untuk memastikan relations dan foreign key dapat digunakan.
 
 **Dependencies:** Task 1
 
-**Files likely touched:** `server/database/schema/auth.ts`, `server/database/schema/constants.ts`, `server/database/schema/member.ts`, `server/database/schema/manual-account.ts`, `server/database/schema/transaction.ts`, `server/database/schema/audit-log.ts`, `server/database/schema/index.ts`, `server/database/index.ts`
+**Files likely touched:** `server/database/schema/constants.ts`, `server/database/schema/member.ts`, `server/database/schema/manual-account.ts`, `server/database/schema/transaction.ts`, `server/database/schema/audit-log.ts`, `server/database/schema/index.ts`, `server/database/index.ts`, `drizzle.config.ts`
 
 **Estimated scope:** Large (5+ files; pecah per domain jika diperlukan)
 

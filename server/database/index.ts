@@ -1,5 +1,5 @@
 import { drizzle } from 'drizzle-orm/libsql'
 import { client } from './libsql'
-import { authRelations } from './schema/auth'
+import { relations } from './schema'
 
-export const db = drizzle({ client, relations: authRelations })
+export const db = drizzle({ client, relations })

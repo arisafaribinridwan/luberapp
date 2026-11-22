@@ -8,7 +8,7 @@ if (url.startsWith('file:.data/')) {
 }
 
 export default defineConfig({
-  schema: './server/database/schema/auth.ts',
+  schema: './server/database/schema/index.ts',
   out: './server/database/migrations',
   dialect: 'turso',
   dbCredentials: {
