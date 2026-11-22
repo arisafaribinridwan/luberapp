@@ -11,7 +11,8 @@
     "lint:fix": "eslint . --fix",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "typecheck": "nuxt typecheck"
+    "typecheck": "nuxt typecheck",
+    "db:seed": "node server/database/seed.mjs"
   },
   "dependencies": {
     "@better-auth/drizzle-adapter": "1.7.26",
