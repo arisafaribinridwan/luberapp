@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#2A41CB">
+  <title>Luber - Manajemen Pengguna</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <script>
+    tailwind.config = {
+      theme: { extend: {
+        fontFamily: {
+          sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+          display: ['"Bricolage Grotesque"', '"Plus Jakarta Sans"', 'sans-serif'],
+        },
+        colors: { brand: {
+          50:'#EFF2FE',100:'#DFE5FC',200:'#C3CDF9',300:'#99A9F3',400:'#6A7CE9',
+          500:'#4559DB',600:'#2A41CB',700:'#2234A6',800:'#1F2E85',900:'#1C2868',950:'#0E1440'
+        } }
+      } }
+    }
+  </script>
+
+  <style>
+    body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    @keyframes sheet-in { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+    @keyframes fade-in  { from { opacity: 0; } to { opacity: 1; } }
+    .sheet-in { animation: sheet-in .35s cubic-bezier(.2,.8,.2,1) both; }
+    .fade-in  { animation: fade-in .2s ease-out both; }
+    @media (prefers-reduced-motion: reduce) { .sheet-in, .fade-in { animation: none; } }
+  </style>
+</head>
+
+<body class="min-h-full bg-brand-950 text-slate-800 antialiased">
+<div class="mx-auto flex min-h-[100dvh] w-full max-w-[430px] flex-col items-center sm:justify-center sm:py-6">
+
+  <!-- SHELL PWA -->
+  <main class="relative flex h-[100dvh] w-full flex-col overflow-hidden bg-brand-50 sm:h-[844px] sm:rounded-[40px] sm:border sm:border-white/10 sm:shadow-2xl">
+
+    <!-- Header -->
+    <header class="shrink-0 rounded-b-[28px] bg-gradient-to-b from-brand-700 to-brand-600 px-5 pb-5 pt-5 text-white shadow-lg shadow-brand-900/20">
+      <div class="flex items-center gap-3">
+        <button onclick="showToast('Kembali ke menu utama')" aria-label="Kembali ke menu utama"
+          class="grid size-11 shrink-0 place-items-center rounded-full border border-white/20 bg-white/10 text-xl transition-colors hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white active:scale-95">
+          <i class="ph-bold ph-arrow-left" aria-hidden="true"></i>
+        </button>
+        <div class="min-w-0">
+          <h1 class="font-display text-2xl font-extrabold leading-none tracking-tight">Pengguna</h1>
+          <p id="subtitle" class="mt-1 text-xs font-medium text-brand-100"></p>
+        </div>
+      </div>
+
+      <div class="relative mt-4">
+        <i class="ph-bold ph-magnifying-glass pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-lg text-brand-200" aria-hidden="true"></i>
+        <input id="search" type="search" placeholder="Cari nama, email, atau no. HP" autocomplete="off"
+          class="h-12 w-full rounded-2xl border border-white/20 bg-white/10 pl-11 pr-4 text-sm font-medium text-white placeholder-brand-200 outline-none transition-colors focus:border-white/60 focus:bg-white/20">
+      </div>
+    </header>
+
+    <!-- Filter tipe anggota -->
+    <nav id="filters" class="hide-scrollbar flex shrink-0 gap-2 overflow-x-auto px-5 py-4" aria-label="Filter tipe anggota"></nav>
+
+    <!-- Daftar -->
+    <section id="list" class="hide-scrollbar min-h-0 flex-1 space-y-3 overflow-y-auto px-5 pb-28" aria-live="polite"></section>
+
+    <!-- Tombol tambah -->
+    <button onclick="openForm()"
+      class="absolute bottom-5 right-5 z-10 flex h-14 items-center gap-2 rounded-full bg-brand-600 pl-5 pr-6 text-sm font-bold text-white shadow-xl shadow-brand-600/40 transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 active:scale-95">
+      <i class="ph-bold ph-plus text-lg" aria-hidden="true"></i>
+      Tambah pengguna
+    </button>
+
+    <!-- Bottom sheet: tambah / ubah -->
+    <div id="form-overlay" class="fade-in absolute inset-0 z-30 hidden items-end bg-brand-950/60 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="form-title">
+      <form id="user-form" novalidate class="sheet-in hide-scrollbar max-h-[94%] w-full overflow-y-auto rounded-t-[32px] bg-white px-5 pb-6 pt-5">
+        <div class="mb-4 flex items-center justify-between">
+          <h2 id="form-title" class="font-display text-xl font-extrabold text-slate-900"></h2>
+          <button type="button" onclick="closeForm()" aria-label="Tutup formulir" class="grid size-10 place-items-center rounded-full bg-slate-100 text-lg text-slate-600 hover:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">
+            <i class="ph-bold ph-x" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        <!-- Foto profil -->
+        <div class="mb-5 flex items-center gap-4">
+          <div class="relative">
+            <div id="photo-preview" class="grid size-[88px] place-items-center overflow-hidden rounded-3xl bg-brand-100 text-2xl font-extrabold text-brand-700"></div>
+            <label for="photo-input" class="absolute -bottom-1.5 -right-1.5 grid size-9 cursor-pointer place-items-center rounded-full bg-brand-600 text-base text-white ring-4 ring-white transition-colors hover:bg-brand-700 has-[:focus-visible]:ring-brand-300">
+              <i class="ph-bold ph-camera" aria-hidden="true"></i>
+              <span class="sr-only">Pilih foto profil</span>
+              <input id="photo-input" type="file" accept="image/*" class="sr-only">
+            </label>
+          </div>
+          <div class="min-w-0">
+            <p class="text-sm font-bold text-slate-900">Foto profil</p>
+            <p class="mt-0.5 text-xs text-slate-500">JPG atau PNG. Otomatis dipangkas persegi.</p>
+            <button id="photo-remove" type="button" onclick="removePhoto()" class="mt-1.5 hidden text-xs font-bold text-rose-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-600">Hapus foto</button>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label for="f-nama" class="mb-1.5 block text-xs font-bold text-slate-700">Nama lengkap</label>
+            <input id="f-nama" name="nama" type="text" autocomplete="off" placeholder="Contoh: Ari Safari" class="field">
+            <p class="err" data-err="nama"></p>
+          </div>
+          <div>
+            <label for="f-email" class="mb-1.5 block text-xs font-bold text-slate-700">Email</label>
+            <input id="f-email" name="email" type="email" autocomplete="off" placeholder="nama@email.com" class="field">
+            <p class="err" data-err="email"></p>
+          </div>
+          <div>
+            <label for="f-hp" class="mb-1.5 block text-xs font-bold text-slate-700">No. HP</label>
+            <input id="f-hp" name="hp" type="tel" inputmode="tel" autocomplete="off" placeholder="0812 3456 7890" class="field">
+            <p class="err" data-err="hp"></p>
+          </div>
+
+          <fieldset>
+            <legend class="mb-1.5 text-xs font-bold text-slate-700">Tipe anggota</legend>
+            <div id="role-options" class="grid grid-cols-3 gap-2"></div>
+            <p class="err" data-err="tipe"></p>
+          </fieldset>
+        </div>
+
+        <div class="mt-6 grid grid-cols-2 gap-2">
+          <button type="button" onclick="closeForm()" class="h-12 rounded-2xl bg-slate-100 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">Batal</button>
+          <button id="form-submit" type="submit" class="h-12 rounded-2xl bg-brand-600 text-sm font-bold text-white shadow-lg shadow-brand-600/30 transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2"></button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Dialog hapus -->
+    <div id="del-overlay" class="fade-in absolute inset-0 z-40 hidden items-center justify-center bg-brand-950/70 p-5 backdrop-blur-md" role="alertdialog" aria-modal="true" aria-labelledby="del-title" aria-describedby="del-desc">
+      <div class="w-full max-w-xs space-y-4 rounded-3xl bg-white p-6 text-center shadow-2xl">
+        <div class="mx-auto grid size-14 place-items-center rounded-full bg-rose-50 text-2xl text-rose-600"><i class="ph-bold ph-trash" aria-hidden="true"></i></div>
+        <div>
+          <h3 id="del-title" class="text-base font-extrabold text-slate-900"></h3>
+          <p id="del-desc" class="mt-1 text-xs leading-relaxed text-slate-500">Akun ini tidak bisa mengakses Luber lagi. Tindakan ini tidak dapat dibatalkan.</p>
+        </div>
+        <div class="grid grid-cols-2 gap-2 pt-1">
+          <button id="del-cancel" onclick="closeDelete()" class="rounded-xl bg-slate-100 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">Batal</button>
+          <button onclick="confirmDelete()" class="rounded-xl bg-rose-600 py-2.5 text-xs font-bold text-white hover:bg-rose-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-600 focus-visible:ring-offset-2">Ya, hapus</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Toast -->
+<div class="pointer-events-none fixed inset-x-0 bottom-24 z-50 flex justify-center px-4" aria-live="polite">
+  <div id="toast" class="flex translate-y-6 items-center gap-2.5 rounded-2xl bg-brand-950 px-4 py-3 text-xs font-medium text-white opacity-0 shadow-2xl ring-1 ring-white/10 transition-all duration-300">
+    <i id="toast-icon" class="ph-fill ph-check-circle text-base text-emerald-400" aria-hidden="true"></i><span id="toast-message"></span>
+  </div>
+</div>
+
+<style type="text/tailwindcss">
+  @layer components {
+    .field { @apply h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20; }
+    .field.invalid { @apply border-rose-500 focus:border-rose-500 focus:ring-rose-500/20; }
+    .err { @apply mt-1.5 hidden text-xs font-medium text-rose-600; }
+  }
+</style>
+
+<script>
+  /* ===== DATA & KONFIGURASI ===== */
+  const ROLES = {
+    admin:    { label: 'Admin',    desc: 'Akses penuh',        icon: 'shield-check',  badge: 'bg-brand-600 text-white',     avatar: 'bg-brand-600 text-white' },
+    pengurus: { label: 'Pengurus', desc: 'Input & transaksi',  icon: 'briefcase',     badge: 'bg-brand-100 text-brand-800', avatar: 'bg-brand-200 text-brand-900' },
+    member:   { label: 'Member',   desc: 'Hanya melihat',      icon: 'user',          badge: 'bg-slate-100 text-slate-600', avatar: 'bg-slate-200 text-slate-700' },
+  };
+
+  let users = [
+    { id: 1, nama: 'Ari Safari',      email: 'ari.safari@luber.id',      hp: '081234567801', tipe: 'admin',    foto: '' },
+    { id: 2, nama: 'Siti Rahmawati',  email: 'siti.rahmawati@luber.id',  hp: '081355219034', tipe: 'admin',    foto: '' },
+    { id: 3, nama: 'Budi Santoso',    email: 'budi.santoso@luber.id',    hp: '082111904477', tipe: 'pengurus', foto: '' },
+    { id: 4, nama: 'Dewi Lestari',    email: 'dewi.lestari@luber.id',    hp: '085277310652', tipe: 'pengurus', foto: '' },
+    { id: 5, nama: 'Rudi Hartono',    email: 'rudi.hartono@luber.id',    hp: '081908822143', tipe: 'pengurus', foto: '' },
+    { id: 6, nama: 'Nur Aini',        email: 'nur.aini@luber.id',        hp: '087812340965', tipe: 'member',   foto: '' },
+    { id: 7, nama: 'Fajar Pratama',   email: 'fajar.pratama@luber.id',   hp: '081288776650', tipe: 'member',   foto: '' },
+    { id: 8, nama: 'Maya Kusuma',     email: 'maya.kusuma@luber.id',     hp: '082244109983', tipe: 'member',   foto: '' },
+  ];
+  let nextId = 9;
+  const ui = { filter: 'semua', query: '', editingId: null, deletingId: null, foto: '' };
+
+  /* ===== HELPER ===== */
+  const $ = (s) => document.querySelector(s);
+  const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  const initials = (n) => n.trim().split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?';
+  const fmtHp = (d) => d.replace(/(\d{4})(?=\d)/g, '$1 ');
+  const normHp = (v) => { let d = v.replace(/[^\d+]/g, ''); d = d.replace(/^\+?62/, '0'); return d; };
+  const adminCount = () => users.filter(u => u.tipe === 'admin').length;
+
+  function avatar(u, size, rounded, text) {
+    return u.foto
+      ? `<img src="${u.foto}" alt="" class="${size} ${rounded} shrink-0 object-cover">`
+      : `<span class="${size} ${rounded} ${text} ${ROLES[u.tipe].avatar} grid shrink-0 place-items-center font-extrabold" aria-hidden="true">${esc(initials(u.nama))}</span>`;
+  }
+
+  /* ===== RENDER DAFTAR ===== */
+  function render() {
+    const q = ui.query.trim().toLowerCase();
+    const shown = users
+      .filter(u => ui.filter === 'semua' || u.tipe === ui.filter)
+      .filter(u => !q || u.nama.toLowerCase().includes(q) || u.email.toLowerCase().includes(q) || u.hp.includes(q.replace(/\D/g, '') || '\u0000'))
+      .sort((a, b) => a.nama.localeCompare(b.nama, 'id'));
+
+    $('#subtitle').textContent = `${users.length} anggota terdaftar`;
+
+    const tabs = [['semua', 'Semua', users.length], ...Object.entries(ROLES).map(([k, r]) => [k, r.label, users.filter(u => u.tipe === k).length])];
+    $('#filters').innerHTML = tabs.map(([k, label, n]) => {
+      const on = ui.filter === k;
+      return `<button onclick="setFilter('${k}')" aria-pressed="${on}" class="flex h-10 shrink-0 items-center gap-2 rounded-full border px-4 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 ${on ? 'border-brand-600 bg-brand-600 text-white' : 'border-brand-100 bg-white text-slate-700 hover:border-brand-300'}">
+        ${label}<span class="rounded-full px-2 py-0.5 text-[11px] ${on ? 'bg-white/20' : 'bg-brand-50 text-brand-700'}">${n}</span></button>`;
+    }).join('');
+
+    if (!shown.length) {
+      $('#list').innerHTML = `
+        <div class="mt-6 flex flex-col items-center rounded-3xl border border-dashed border-brand-200 bg-white/60 px-6 py-10 text-center">
+          <div class="grid size-14 place-items-center rounded-full bg-brand-100 text-2xl text-brand-600"><i class="ph-bold ph-users-three" aria-hidden="true"></i></div>
+          <p class="mt-4 text-sm font-bold text-slate-900">${users.length ? 'Tidak ada pengguna yang cocok' : 'Belum ada pengguna'}</p>
+          <p class="mt-1 text-xs text-slate-500">${users.length ? 'Ubah kata kunci atau filter tipe anggota.' : 'Tambahkan pengguna pertama untuk memulai.'}</p>
+          <button onclick="${users.length ? 'resetFilters()' : 'openForm()'}" class="mt-4 h-10 rounded-full bg-brand-600 px-5 text-xs font-bold text-white hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">${users.length ? 'Hapus filter' : 'Tambah pengguna'}</button>
+        </div>`;
+      return;
+    }
+
+    $('#list').innerHTML = shown.map(u => `
+      <article class="flex items-center gap-3 rounded-2xl border border-brand-100/70 bg-white p-3 shadow-sm">
+        ${avatar(u, 'size-14', 'rounded-2xl', 'text-base')}
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-2">
+            <h3 class="truncate text-sm font-extrabold text-slate-900">${esc(u.nama)}</h3>
+            <span class="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${ROLES[u.tipe].badge}">${ROLES[u.tipe].label}</span>
+          </div>
+          <p class="mt-0.5 truncate text-xs text-slate-500">${esc(u.email)}</p>
+          <p class="text-xs font-medium text-slate-500">${fmtHp(esc(u.hp))}</p>
+        </div>
+        <div class="flex shrink-0 flex-col gap-1.5">
+          <button onclick="openForm(${u.id})" aria-label="Ubah ${esc(u.nama)}" class="grid size-9 place-items-center rounded-xl bg-brand-50 text-base text-brand-600 transition-colors hover:bg-brand-600 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 active:scale-95"><i class="ph-bold ph-pencil-simple" aria-hidden="true"></i></button>
+          <button onclick="askDelete(${u.id})" aria-label="Hapus ${esc(u.nama)}" class="grid size-9 place-items-center rounded-xl bg-rose-50 text-base text-rose-600 transition-colors hover:bg-rose-600 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-600 active:scale-95"><i class="ph-bold ph-trash" aria-hidden="true"></i></button>
+        </div>
+      </article>`).join('');
+  }
+
+  function setFilter(k) { ui.filter = k; render(); }
+  function resetFilters() { ui.filter = 'semua'; ui.query = ''; $('#search').value = ''; render(); }
+  $('#search').addEventListener('input', e => { ui.query = e.target.value; render(); });
+
+  /* ===== FORM TAMBAH / UBAH ===== */
+  function renderRoleOptions(selected) {
+    $('#role-options').innerHTML = Object.entries(ROLES).map(([k, r]) => `
+      <label class="flex cursor-pointer flex-col items-center gap-1 rounded-2xl border border-slate-200 p-3 text-center transition-colors hover:border-brand-300 has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand-600">
+        <input type="radio" name="tipe" value="${k}" class="sr-only" ${selected === k ? 'checked' : ''}>
+        <i class="ph-bold ph-${r.icon} text-xl text-brand-600" aria-hidden="true"></i>
+        <span class="text-xs font-bold text-slate-900">${r.label}</span>
+        <span class="text-[10px] font-medium leading-tight text-slate-500">${r.desc}</span>
+      </label>`).join('');
+  }
+
+  function paintPhoto() {
+    const name = $('#f-nama').value;
+    $('#photo-preview').innerHTML = ui.foto
+      ? `<img src="${ui.foto}" alt="Pratinjau foto profil" class="size-full object-cover">`
+      : (name.trim() ? esc(initials(name)) : '<i class="ph-bold ph-user text-4xl" aria-hidden="true"></i>');
+    $('#photo-remove').classList.toggle('hidden', !ui.foto);
+  }
+
+  function openForm(id = null) {
+    const u = id ? users.find(x => x.id === id) : null;
+    ui.editingId = id; ui.foto = u ? u.foto : '';
+    $('#form-title').textContent = u ? 'Ubah pengguna' : 'Tambah pengguna';
+    $('#form-submit').textContent = u ? 'Simpan perubahan' : 'Tambah pengguna';
+    $('#f-nama').value = u ? u.nama : '';
+    $('#f-email').value = u ? u.email : '';
+    $('#f-hp').value = u ? fmtHp(u.hp) : '';
+    $('#photo-input').value = '';
+    renderRoleOptions(u ? u.tipe : 'member');
+    clearErrors(); paintPhoto();
+    const o = $('#form-overlay'); o.classList.remove('hidden'); o.classList.add('flex');
+    $('#f-nama').focus({ preventScroll: true });
+  }
+  function closeForm() { const o = $('#form-overlay'); o.classList.add('hidden'); o.classList.remove('flex'); }
+
+  $('#f-nama').addEventListener('input', () => { if (!ui.foto) paintPhoto(); });
+
+  // Foto: pangkas persegi 256px agar ringan
+  $('#photo-input').addEventListener('change', e => {
+    const file = e.target.files[0]; if (!file) return;
+    if (!file.type.startsWith('image/')) { showToast('File harus berupa gambar', 'error'); return; }
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => {
+      const s = Math.min(img.width, img.height), c = document.createElement('canvas');
+      c.width = c.height = 256;
+      c.getContext('2d').drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, 256, 256);
+      ui.foto = c.toDataURL('image/jpeg', 0.82); URL.revokeObjectURL(url); paintPhoto();
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); showToast('Foto tidak bisa dibaca. Coba file lain.', 'error'); };
+    img.src = url;
+  });
+  function removePhoto() { ui.foto = ''; $('#photo-input').value = ''; paintPhoto(); }
+
+  /* ===== VALIDASI & SIMPAN ===== */
+  function setError(field, msg) {
+    const p = document.querySelector(`[data-err="${field}"]`);
+    p.textContent = msg; p.classList.toggle('hidden', !msg);
+    const input = { nama: '#f-nama', email: '#f-email', hp: '#f-hp' }[field];
+    if (input) $(input).classList.toggle('invalid', !!msg);
+  }
+  function clearErrors() { ['nama', 'email', 'hp', 'tipe'].forEach(f => setError(f, '')); }
+
+  $('#user-form').addEventListener('submit', e => {
+    e.preventDefault(); clearErrors();
+    const nama = $('#f-nama').value.trim(), email = $('#f-email').value.trim(), hp = normHp($('#f-hp').value);
+    const tipe = (document.querySelector('input[name="tipe"]:checked') || {}).value;
+    let first = null; const fail = (f, m, sel) => { setError(f, m); first = first || sel; };
+
+    if (nama.length < 3) fail('nama', 'Isi nama lengkap, minimal 3 huruf.', '#f-nama');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) fail('email', 'Format email belum benar. Contoh: nama@email.com', '#f-email');
+    else if (users.some(u => u.id !== ui.editingId && u.email.toLowerCase() === email.toLowerCase())) fail('email', 'Email ini sudah dipakai pengguna lain.', '#f-email');
+    if (!/^08\d{8,11}$/.test(hp)) fail('hp', 'Nomor HP harus diawali 08 atau +62, 10 sampai 13 digit.', '#f-hp');
+    else if (users.some(u => u.id !== ui.editingId && u.hp === hp)) fail('hp', 'Nomor HP ini sudah dipakai pengguna lain.', '#f-hp');
+    if (!tipe) fail('tipe', 'Pilih tipe anggota.', null);
+    const cur = users.find(u => u.id === ui.editingId);
+    if (cur && cur.tipe === 'admin' && tipe && tipe !== 'admin' && adminCount() === 1) fail('tipe', 'Harus ada minimal satu admin. Jadikan pengguna lain admin lebih dulu.', null);
+    if (first) { $(first).focus(); return; }
+
+    if (cur) { Object.assign(cur, { nama, email, hp, tipe, foto: ui.foto }); showToast('Perubahan tersimpan'); }
+    else { users.push({ id: nextId++, nama, email, hp, tipe, foto: ui.foto }); showToast('Pengguna ditambahkan'); }
+    closeForm(); render();
+  });
+
+  /* ===== HAPUS ===== */
+  function askDelete(id) {
+    const u = users.find(x => x.id === id);
+    if (u.tipe === 'admin' && adminCount() === 1) { showToast('Admin terakhir tidak bisa dihapus', 'error'); return; }
+    ui.deletingId = id;
+    $('#del-title').textContent = `Hapus ${u.nama}?`;
+    const o = $('#del-overlay'); o.classList.remove('hidden'); o.classList.add('flex');
+    $('#del-cancel').focus();
+  }
+  function closeDelete() { const o = $('#del-overlay'); o.classList.add('hidden'); o.classList.remove('flex'); }
+  function confirmDelete() {
+    users = users.filter(u => u.id !== ui.deletingId);
+    closeDelete(); render(); showToast('Pengguna dihapus');
+  }
+
+  /* ===== TOAST & KEYBOARD ===== */
+  let tt;
+  function showToast(msg, type = 'ok') {
+    const t = $('#toast'), i = $('#toast-icon');
+    $('#toast-message').textContent = msg;
+    i.className = type === 'error' ? 'ph-fill ph-warning-circle text-base text-amber-400' : 'ph-fill ph-check-circle text-base text-emerald-400';
+    t.classList.remove('translate-y-6', 'opacity-0');
+    clearTimeout(tt); tt = setTimeout(() => t.classList.add('translate-y-6', 'opacity-0'), 2600);
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeForm(); closeDelete(); } });
+  ['form-overlay', 'del-overlay'].forEach(id => document.getElementById(id).addEventListener('click', e => {
+    if (e.target.id === id) id === 'form-overlay' ? closeForm() : closeDelete();
+  }));
+
+  render();
+</script>
+</body>
+</html>
