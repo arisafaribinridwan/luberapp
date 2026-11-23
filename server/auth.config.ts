@@ -4,6 +4,7 @@ import { admin, twoFactor } from 'better-auth/plugins'
 import { db } from './database'
 import * as schema from './database/schema/auth'
 import { ac, adminRoles, defaultRole, roles } from '../shared/auth/permissions'
+import { auditAuthEvent } from './services/audit-auth-hooks'
 
 export default defineServerAuth({
   appName: 'Luber',
@@ -15,6 +16,12 @@ export default defineServerAuth({
   session: {
     expiresIn: 60 * 60,
     updateAge: 0
+  },
+  hooks: {
+    after: async (context) => {
+      await auditAuthEvent(context)
+      return {}
+    }
   },
   plugins: [
     admin({ ac, roles, defaultRole, adminRoles }),

@@ -5,6 +5,7 @@ import { drizzle } from 'drizzle-orm/libsql'
 import { client } from './server/database/libsql'
 import * as schema from './server/database/schema/auth'
 import { ac, adminRoles, defaultRole, roles } from './shared/auth/permissions'
+import { auditAuthEvent } from './server/services/audit-auth-hooks'
 
 export const auth = betterAuth({
   appName: 'Luber',
@@ -16,6 +17,12 @@ export const auth = betterAuth({
   session: {
     expiresIn: 60 * 60,
     updateAge: 0
+  },
+  hooks: {
+    after: async (context) => {
+      await auditAuthEvent(context)
+      return {}
+    }
   },
   plugins: [
     admin({ ac, roles, defaultRole, adminRoles }),

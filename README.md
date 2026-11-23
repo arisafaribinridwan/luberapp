@@ -26,6 +26,8 @@ DATABASE_URL=libsql://nama-db.turso.io DATABASE_AUTH_TOKEN=... pnpm db:seed
 
 `pnpm db:seed` aman dijalankan berulang kali. Rekening awal diidentifikasi oleh nama unik dan baris yang sudah ada tidak ditimpa.
 
+Admin dapat membaca audit log melalui `GET /api/admin/audit-logs`. Endpoint ini hanya menerima session dengan role `admin`, mendukung filter `from`, `to`, `eventType`, `actorId`, `page`, dan `limit`, serta tidak menyediakan operasi edit atau hapus.
+
 ## Verifikasi
 
 ```bash

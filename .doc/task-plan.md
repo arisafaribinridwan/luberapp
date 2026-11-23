@@ -216,10 +216,10 @@ Audit baseline dan kontrak aplikasi
 
 **Acceptance criteria:**
 
-- [ ] Login berhasil/gagal, logout, transaksi, transfer, perubahan rekening, perubahan user/role, konfigurasi, dan penolakan aksi dapat dicatat.
-- [ ] Log tidak menyimpan password, PIN, token, atau isi lampiran.
-- [ ] Tidak ada endpoint edit/delete log.
-- [ ] Hanya admin dapat membaca log.
+- [x] Login berhasil/gagal, logout, transaksi, transfer, perubahan rekening, perubahan user/role, konfigurasi, dan penolakan aksi dapat dicatat.
+- [x] Log tidak menyimpan password, PIN, token, atau isi lampiran.
+- [x] Tidak ada endpoint edit/delete log.
+- [x] Hanya admin dapat membaca log.
 
 **Verification:**
 
@@ -236,7 +236,7 @@ Audit baseline dan kontrak aplikasi
 
 - [x] Schema modular dan migration lulus pada SQLite.
 - [x] Seed idempotent.
-- [ ] Audit log append-only tersimpan untuk event penting.
+- [x] Audit log append-only tersimpan untuk event penting.
 - [ ] Tidak ada endpoint aplikasi yang melewati session guard.
 
 ### Phase 3: Master data dan attachment
