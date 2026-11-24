@@ -1,11 +1,12 @@
 import { createError } from 'h3'
-import type { ZodError } from 'zod'
+import { z, type ZodError } from 'zod'
 import {
   insertMemberSchema,
   updateMemberSchema,
   type InsertMember,
   type UpdateMember
 } from '../database/schema'
+import { USER_ROLES } from '../database/schema/constants'
 import { findMemberById, insertMember, updateMember } from '../repositories/member-repository'
 
 function validationError(error: ZodError) {
@@ -23,14 +24,29 @@ export function normalizeMemberInput(input: unknown): InsertMember {
   return result.data
 }
 
+const createMemberSchema = insertMemberSchema.extend({
+  email: z.email('Format email belum benar.').trim().toLowerCase(),
+  password: z.string().min(8, 'Password minimal 8 karakter.').max(128, 'Password terlalu panjang.'),
+  role: z.enum(USER_ROLES)
+})
+
+export type CreateMemberInput = z.infer<typeof createMemberSchema>
+
+export function normalizeMemberCreate(input: unknown): CreateMemberInput {
+  const result = createMemberSchema.safeParse(input)
+  if (!result.success) throw validationError(result.error)
+  return result.data
+}
+
 export function normalizeMemberUpdate(input: unknown): UpdateMember {
   const result = updateMemberSchema.safeParse(input)
   if (!result.success) throw validationError(result.error)
   return result.data
 }
 
-export async function createMember(input: unknown) {
-  const normalized = normalizeMemberInput(input)
+export async function createMember(input: unknown, userId?: string) {
+  const source = input && typeof input === 'object' ? input : {}
+  const normalized = normalizeMemberInput({ ...source, userId })
   if (await findMemberById(normalized.id)) throw createError({ statusCode: 409, statusMessage: 'ID anggota sudah digunakan' })
   return insertMember(normalized)
 }

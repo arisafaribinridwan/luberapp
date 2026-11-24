@@ -1,5 +1,4 @@
 <script setup lang="ts">
-/* eslint-disable better-tailwindcss/no-unknown-classes */
 import { computed, onMounted, reactive, shallowRef, watch } from 'vue'
 import { z } from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
@@ -21,14 +20,16 @@ const form = reactive({ id: '', name: '', email: '', phone: '', role: 'member' a
 const photoPreview = shallowRef('')
 const photoInput = shallowRef<HTMLInputElement | null>(null)
 
-const userSchema = z.object({
+const createUserSchema = z.object({
   name: z.string().trim().min(3, 'Nama lengkap minimal 3 karakter.'),
   email: z.string().trim().email('Format email belum benar.'),
   phone: z.string().trim().regex(/^08\d{8,11}$/, 'Nomor HP harus diawali 08 dan berisi 10–13 digit.'),
   role: z.enum(['admin', 'pengurus', 'member'], { message: 'Pilih tipe anggota.' }),
   password: z.string().min(8, 'Password minimal 8 karakter.')
 })
-type UserForm = z.infer<typeof userSchema>
+const editUserSchema = createUserSchema.pick({ name: true, phone: true, role: true })
+const userSchema = computed(() => editing.value ? editUserSchema : createUserSchema)
+type UserForm = z.infer<typeof createUserSchema>
 const roleOptions = [
   { value: 'admin' as const, label: 'Admin', description: 'Akses penuh', icon: 'i-lucide-shield-check' },
   { value: 'pengurus' as const, label: 'Pengurus', description: 'Input & transaksi', icon: 'i-lucide-briefcase-business' },
@@ -77,7 +78,7 @@ function openCreate() {
 
 function openEdit(member: MemberDto) {
   editing.value = member
-  Object.assign(form, { id: member.id, name: member.name, email: '', phone: member.phone ?? '', role: 'member', password: '' })
+  Object.assign(form, { id: member.id, name: member.name, email: member.email ?? '', phone: member.phone ?? '', role: member.role ?? 'member', password: '' })
   photoPreview.value = ''
   notice.value = ''
   errorMessage.value = ''
@@ -102,16 +103,29 @@ function handlePhoto(event: Event) {
   reader.readAsDataURL(file)
 }
 
-async function saveMember(event: FormSubmitEvent<UserForm>) {
+async function saveMember(event: FormSubmitEvent<{ name: string, phone: string, role: UserForm['role'], email?: string, password?: string }>) {
   if (saving.value) return
   saving.value = true
   errorMessage.value = ''
   try {
     if (editing.value) {
-      await $fetch(`/api/admin/members/${encodeURIComponent(editing.value.id)}`, { method: 'PATCH', body: { name: event.data.name, phone: event.data.phone } })
+      await $fetch(`/api/admin/members/${encodeURIComponent(editing.value.id)}`, {
+        method: 'PATCH',
+        body: { name: event.data.name, phone: event.data.phone, role: event.data.role }
+      })
       notice.value = 'Data anggota berhasil diperbarui.'
     } else {
-      await $fetch('/api/admin/members', { method: 'POST', body: { id: form.id || `USR-${Date.now().toString(36).toUpperCase()}`, name: event.data.name, phone: event.data.phone } })
+      await $fetch('/api/admin/members', {
+        method: 'POST',
+        body: {
+          id: form.id || `USR-${Date.now().toString(36).toUpperCase()}`,
+          name: event.data.name,
+          email: event.data.email,
+          phone: event.data.phone,
+          password: event.data.password,
+          role: event.data.role
+        }
+      })
       notice.value = 'Anggota baru berhasil ditambahkan.'
     }
     formOpen.value = false
@@ -154,7 +168,7 @@ useSeoMeta({ title: 'Kelola Pengguna | Luber' })
 </script>
 
 <template>
-  <main class="users-shell relative flex w-full flex-col overflow-hidden bg-[#EFF2FE] text-slate-800 sm:min-h-211 sm:rounded-[40px] sm:border sm:border-white/10 sm:shadow-2xl">
+  <main class="relative flex min-h-full w-full flex-col overflow-hidden bg-[#EFF2FE] text-slate-800 sm:rounded-[40px] sm:border sm:border-white/10 sm:shadow-2xl">
     <header class="shrink-0 rounded-b-[28px] bg-linear-to-b from-[#2234A6] to-[#2A41CB] px-5 pb-5 pt-5 text-white shadow-lg shadow-[#1C2868]/20">
       <div class="flex items-center gap-3">
         <NuxtLink
@@ -279,7 +293,7 @@ useSeoMeta({ title: 'Kelola Pengguna | Luber' })
                 :class="roleTone(member.status)"
               >{{ member.status === 'ACTIVE' ? 'Aktif' : 'Nonaktif' }}</span>
             </div><p class="mt-0.5 truncate text-xs text-slate-500">
-              ID: {{ member.id }}
+              {{ member.email ?? 'Email belum diisi' }}
             </p><p class="text-xs font-medium text-slate-500">
               {{ formatPhone(member.phone) }}
             </p>
@@ -312,7 +326,7 @@ useSeoMeta({ title: 'Kelola Pengguna | Luber' })
 
     <button
       type="button"
-      class="absolute bottom-5 right-5 z-10 flex h-14 items-center gap-2 rounded-full bg-[#2A41CB] pl-5 pr-6 text-sm font-bold text-white shadow-xl shadow-[#2A41CB]/40 transition hover:bg-[#2234A6] active:scale-95"
+      class="absolute bottom-[calc(2rem+env(safe-area-inset-bottom))] right-5 z-10 flex h-14 items-center gap-2 rounded-full bg-[#2A41CB] pl-5 pr-6 text-sm font-bold text-white shadow-xl shadow-[#2A41CB]/40 transition hover:bg-[#2234A6] active:scale-95 sm:bottom-6"
       @click="openCreate"
     >
       <UIcon
@@ -535,7 +549,6 @@ useSeoMeta({ title: 'Kelola Pengguna | Luber' })
 </template>
 
 <style scoped>
-.users-shell { min-height: 100vh; min-height: 100dvh; }
 .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 .hide-scrollbar::-webkit-scrollbar { display: none; }
 .member-field { width: 100%; height: 3rem; border: 1px solid #e2e8f0; border-radius: .75rem; background: #fff; padding: 0 1rem; font-size: .875rem; font-weight: 500; color: #0f172a; outline: none; }

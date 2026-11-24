@@ -2,7 +2,10 @@ import type { MemberStatus } from '~~/server/database/schema/constants'
 
 export type MemberDto = {
   id: string
+  userId: string | null
   name: string
+  email: string | null
+  role: 'admin' | 'pengurus' | 'member' | null
   phone: string | null
   status: MemberStatus
   createdAt: string
