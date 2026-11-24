@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, shallowRef, watch } from 'vue'
-import { z } from 'zod'
-import type { FormSubmitEvent } from '@nuxt/ui'
+import { computed, onMounted, shallowRef, watch } from 'vue'
 import type { MemberDto, MemberListResponse } from '~~/shared/types/member'
 import type { MemberStatus } from '~~/server/database/schema/constants'
 
@@ -13,28 +11,9 @@ const pending = shallowRef(false)
 const saving = shallowRef(false)
 const notice = shallowRef('')
 const errorMessage = shallowRef('')
-const formOpen = shallowRef(false)
-const editing = shallowRef<MemberDto | null>(null)
 const deactivateTarget = shallowRef<MemberDto | null>(null)
-const form = reactive({ id: '', name: '', email: '', phone: '', role: 'member' as 'admin' | 'pengurus' | 'member', password: '' })
-const photoPreview = shallowRef('')
-const photoInput = shallowRef<HTMLInputElement | null>(null)
-
-const createUserSchema = z.object({
-  name: z.string().trim().min(3, 'Nama lengkap minimal 3 karakter.'),
-  email: z.string().trim().email('Format email belum benar.'),
-  phone: z.string().trim().regex(/^08\d{8,11}$/, 'Nomor HP harus diawali 08 dan berisi 10–13 digit.'),
-  role: z.enum(['admin', 'pengurus', 'member'], { message: 'Pilih tipe anggota.' }),
-  password: z.string().min(8, 'Password minimal 8 karakter.')
-})
-const editUserSchema = createUserSchema.pick({ name: true, phone: true, role: true })
-const userSchema = computed(() => editing.value ? editUserSchema : createUserSchema)
-type UserForm = z.infer<typeof createUserSchema>
-const roleOptions = [
-  { value: 'admin' as const, label: 'Admin', description: 'Akses penuh', icon: 'i-lucide-shield-check' },
-  { value: 'pengurus' as const, label: 'Pengurus', description: 'Input & transaksi', icon: 'i-lucide-briefcase-business' },
-  { value: 'member' as const, label: 'Member', description: 'Hanya melihat', icon: 'i-lucide-user' }
-]
+const actionTarget = shallowRef<MemberDto | null>(null)
+const actionDrawerOpen = shallowRef(false)
 
 const filters = [
   { key: 'ALL' as const, label: 'Semua' },
@@ -68,74 +47,24 @@ watch([query, filter], () => {
 onMounted(loadMembers)
 
 function openCreate() {
-  editing.value = null
-  Object.assign(form, { id: '', name: '', email: '', phone: '', role: 'member', password: '' })
-  photoPreview.value = ''
-  notice.value = ''
-  errorMessage.value = ''
-  formOpen.value = true
+  navigateTo('/admin/user-form')
 }
 
-function openEdit(member: MemberDto) {
-  editing.value = member
-  Object.assign(form, { id: member.id, name: member.name, email: member.email ?? '', phone: member.phone ?? '', role: member.role ?? 'member', password: '' })
-  photoPreview.value = ''
-  notice.value = ''
-  errorMessage.value = ''
-  formOpen.value = true
+function openActions(member: MemberDto) {
+  actionTarget.value = member
+  actionDrawerOpen.value = true
 }
 
-function selectPhoto() {
-  photoInput.value?.click()
+function openEdit() {
+  if (!actionTarget.value) return
+  actionDrawerOpen.value = false
+  navigateTo(`/admin/user-form?id=${encodeURIComponent(actionTarget.value.id)}`)
 }
 
-function handlePhoto(event: Event) {
-  const file = (event.target as HTMLInputElement).files?.[0]
-  if (!file) return
-  if (!file.type.startsWith('image/')) {
-    errorMessage.value = 'Foto profil harus berupa gambar.'
-    return
-  }
-  const reader = new FileReader()
-  reader.onload = () => {
-    photoPreview.value = String(reader.result ?? '')
-  }
-  reader.readAsDataURL(file)
-}
-
-async function saveMember(event: FormSubmitEvent<{ name: string, phone: string, role: UserForm['role'], email?: string, password?: string }>) {
-  if (saving.value) return
-  saving.value = true
-  errorMessage.value = ''
-  try {
-    if (editing.value) {
-      await $fetch(`/api/admin/members/${encodeURIComponent(editing.value.id)}`, {
-        method: 'PATCH',
-        body: { name: event.data.name, phone: event.data.phone, role: event.data.role }
-      })
-      notice.value = 'Data anggota berhasil diperbarui.'
-    } else {
-      await $fetch('/api/admin/members', {
-        method: 'POST',
-        body: {
-          id: form.id || `USR-${Date.now().toString(36).toUpperCase()}`,
-          name: event.data.name,
-          email: event.data.email,
-          phone: event.data.phone,
-          password: event.data.password,
-          role: event.data.role
-        }
-      })
-      notice.value = 'Anggota baru berhasil ditambahkan.'
-    }
-    formOpen.value = false
-    await loadMembers()
-  } catch (error: unknown) {
-    const message = error as { data?: { statusMessage?: string } }
-    errorMessage.value = message.data?.statusMessage ?? 'Data anggota tidak dapat disimpan.'
-  } finally {
-    saving.value = false
-  }
+function requestDelete() {
+  if (!actionTarget.value) return
+  actionDrawerOpen.value = false
+  deactivateTarget.value = actionTarget.value
 }
 
 async function toggleStatus() {
@@ -297,26 +226,16 @@ useSeoMeta({ title: 'Kelola Pengguna | Luber' })
             </p><p class="text-xs font-medium text-slate-500">
               {{ formatPhone(member.phone) }}
             </p>
-          </div><div class="flex shrink-0 flex-col gap-1.5">
+          </div><div class="flex shrink-0">
             <button
               type="button"
-              :aria-label="`Ubah ${member.name}`"
-              class="grid size-9 place-items-center rounded-xl bg-[#EFF2FE] text-[#2A41CB] transition hover:bg-[#2A41CB] hover:text-white"
-              @click="openEdit(member)"
+              :aria-label="`Aksi untuk ${member.name}`"
+              class="grid size-10 place-items-center rounded-xl bg-[#EFF2FE] text-[#2A41CB] transition hover:bg-[#2A41CB] hover:text-white"
+              @click="openActions(member)"
             >
               <UIcon
-                name="i-lucide-pencil"
-                class="size-4"
-              />
-            </button><button
-              type="button"
-              :aria-label="member.status === 'ACTIVE' ? `Nonaktifkan ${member.name}` : `Aktifkan ${member.name}`"
-              class="grid size-9 place-items-center rounded-xl bg-rose-50 text-rose-600 transition hover:bg-rose-600 hover:text-white"
-              @click="deactivateTarget = member"
-            >
-              <UIcon
-                :name="member.status === 'ACTIVE' ? 'i-lucide-user-x' : 'i-lucide-user-check'"
-                class="size-4"
+                name="i-lucide-ellipsis-vertical"
+                class="size-5"
               />
             </button>
           </div>
@@ -336,173 +255,69 @@ useSeoMeta({ title: 'Kelola Pengguna | Luber' })
     </button>
 
     <UDrawer
-      v-model:open="formOpen"
+      v-model:open="actionDrawerOpen"
       direction="bottom"
       :handle="false"
       :overlay="true"
-      :ui="{ content: 'mx-auto max-h-[94dvh] w-full max-w-lg rounded-t-[32px] bg-white' }"
+      :ui="{ content: 'mx-auto w-full max-w-lg rounded-t-[32px] bg-white' }"
     >
       <template #body>
-        <UForm
-          :schema="userSchema"
-          :state="form"
-          class="px-5 pb-6 pt-2"
-          @submit="saveMember"
+        <div
+          v-if="actionTarget"
+          class="space-y-2 p-5 pb-7"
         >
-          <div class="mb-5 flex items-center justify-between">
-            <h2 class="text-xl font-extrabold text-slate-900">
-              {{ editing ? 'Ubah pengguna' : 'Tambah pengguna' }}
-            </h2><button
+          <div class="mb-4 flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Aksi pengguna
+              </p>
+              <h2 class="mt-1 text-lg font-extrabold text-slate-900">
+                {{ actionTarget.name }}
+              </h2>
+            </div>
+            <button
               type="button"
-              aria-label="Tutup formulir"
+              aria-label="Tutup menu aksi"
               class="grid size-10 place-items-center rounded-full bg-slate-100 text-slate-600"
-              @click="formOpen = false"
+              @click="actionDrawerOpen = false"
             >
               <UIcon name="i-lucide-x" />
             </button>
           </div>
-
-          <div class="mb-5 flex items-center gap-4">
-            <div class="relative">
-              <button
-                type="button"
-                class="grid size-22 place-items-center overflow-hidden rounded-3xl bg-[#DFE5FC] text-[#2A41CB]"
-                aria-label="Pilih foto profil"
-                @click="selectPhoto"
-              >
-                <img
-                  v-if="photoPreview"
-                  :src="photoPreview"
-                  alt="Pratinjau foto profil"
-                  class="size-full object-cover"
-                >
-                <UIcon
-                  v-else
-                  name="i-lucide-user-round"
-                  class="size-11"
-                />
-              </button>
-              <button
-                type="button"
-                class="absolute -bottom-1.5 -right-1.5 grid size-9 place-items-center rounded-full bg-[#2A41CB] text-white ring-4 ring-white"
-                aria-label="Pilih foto profil"
-                @click="selectPhoto"
-              >
-                <UIcon
-                  name="i-lucide-camera"
-                  class="size-4"
-                />
-              </button>
-              <input
-                ref="photoInput"
-                type="file"
-                accept="image/png,image/jpeg"
-                class="hidden"
-                @change="handlePhoto"
-              >
-            </div>
-            <div class="min-w-0">
-              <p class="text-sm font-bold text-slate-900">
-                Foto profil
-              </p><p class="mt-0.5 text-xs text-slate-500">
-                JPG atau PNG. Otomatis dipangkas persegi.
-              </p><button
-                v-if="photoPreview"
-                type="button"
-                class="mt-1.5 text-xs font-bold text-rose-600"
-                @click="photoPreview = ''"
-              >
-                Hapus foto
-              </button>
-            </div>
-          </div>
-
-          <div class="space-y-3">
-            <UFormField
-              label="Nama lengkap"
-              name="name"
-            >
-              <UInput
-                v-model="form.name"
-                class="w-full"
-                size="xl"
-                placeholder="Contoh: Ari Safari"
-              />
-            </UFormField>
-            <UFormField
-              label="Email"
-              name="email"
-            >
-              <UInput
-                v-model="form.email"
-                class="w-full"
-                size="xl"
-                type="email"
-                placeholder="nama@email.com"
-              />
-            </UFormField>
-            <UFormField
-              label="No. HP"
-              name="phone"
-            >
-              <UInput
-                v-model="form.phone"
-                class="w-full"
-                size="xl"
-                type="tel"
-                placeholder="0812 3456 7890"
-              />
-            </UFormField>
-            <UFormField
-              label="Tipe anggota"
-              name="role"
-            >
-              <div class="grid grid-cols-3 gap-2">
-                <button
-                  v-for="option in roleOptions"
-                  :key="option.value"
-                  type="button"
-                  class="flex min-h-22 flex-col items-center justify-center rounded-2xl border px-1 text-center transition"
-                  :class="form.role === option.value ? 'border-[#2A41CB] bg-[#EFF2FE] text-[#1F2E85] ring-1 ring-[#2A41CB]' : 'border-slate-200 text-slate-900 hover:border-[#99A9F3]'"
-                  @click="form.role = option.value"
-                >
-                  <UIcon
-                    :name="option.icon"
-                    class="size-5 text-[#2A41CB]"
-                  /><span class="mt-1 text-xs font-bold">{{ option.label }}</span><span class="text-[10px] text-slate-500">{{ option.description }}</span>
-                </button>
-              </div>
-            </UFormField>
-            <UFormField
-              label="Password"
-              name="password"
-            >
-              <UInput
-                v-model="form.password"
-                class="w-full"
-                size="xl"
-                type="password"
-                placeholder="Minimal 8 karakter"
-              />
-            </UFormField>
-          </div>
-
-          <div class="mt-6 grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              class="h-12 rounded-2xl bg-slate-100 text-sm font-bold text-slate-700"
-              @click="formOpen = false"
-            >
-              Batal
-            </button><button
-              type="submit"
-              :disabled="saving"
-              class="h-12 rounded-2xl bg-[#2A41CB] text-sm font-bold text-white shadow-lg shadow-[#2A41CB]/30 disabled:opacity-50"
-            >
-              {{ saving ? 'Menyimpan...' : editing ? 'Simpan perubahan' : 'Tambah pengguna' }}
-            </button>
-          </div>
-        </UForm>
+          <button
+            type="button"
+            class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-bold text-slate-800 transition hover:bg-[#EFF2FE]"
+            @click="openEdit"
+          >
+            <UIcon
+              name="i-lucide-pencil"
+              class="size-5 text-[#2A41CB]"
+            />
+            Edit pengguna
+          </button>
+          <button
+            type="button"
+            class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-bold text-slate-800 transition hover:bg-[#EFF2FE]"
+            @click="navigateTo(`/admin/user-form?id=${encodeURIComponent(actionTarget.id)}&mode=reset`); actionDrawerOpen = false"
+          >
+            <UIcon
+              name="i-lucide-key-round"
+              class="size-5 text-[#2A41CB]"
+            />
+            Reset password
+          </button>
+          <button
+            type="button"
+            class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-bold text-rose-600 transition hover:bg-rose-50"
+            @click="requestDelete"
+          >
+            <UIcon
+              name="i-lucide-trash-2"
+              class="size-5"
+            />
+            Hapus pengguna
+          </button>
+        </div>
       </template>
     </UDrawer>
 
