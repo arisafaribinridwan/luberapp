@@ -4,7 +4,7 @@ const isExpired = computed(() => route.query.expired === '1' || route.query.expi
 </script>
 
 <template>
-  <main class="relative flex min-h-dvh w-full flex-col items-center justify-between overflow-hidden px-6 py-10 sm:py-12">
+  <main class="relative flex min-h-full w-full flex-col items-center justify-between overflow-hidden px-6 pt-10 pb-[calc(4rem+env(safe-area-inset-bottom))] sm:pt-12 sm:pb-16">
     <!-- Background Photo from Unsplash with Gradient Overlay -->
     <div class="pointer-events-none absolute inset-0 z-0">
       <img
@@ -13,7 +13,7 @@ const isExpired = computed(() => route.query.expired === '1' || route.query.expi
         class="size-full object-cover object-center opacity-45"
       >
       <!-- Multi-stop Gradient Overlay for depth and readability -->
-      <div class="absolute inset-0 bg-gradient-to-b from-[#2A41CB]/25 via-[#F8F9FB]/80 to-[#F8F9FB]" />
+      <div class="absolute inset-0 bg-linear-to-b from-[#2A41CB]/25 via-[#F8F9FB]/80 to-[#F8F9FB]" />
       <div class="absolute inset-0 bg-radial-[at_top] from-[#2A41CB]/15 via-transparent to-transparent" />
     </div>
 

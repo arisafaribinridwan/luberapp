@@ -166,7 +166,7 @@ const menuToneClasses = (tone: MenuItem['tone']) => ({
       </section>
 
       <section
-        class="mt-auto shrink-0 rounded-t-4xl text-white border border-white/20 bg-white/10 px-5 pb-5 pt-6 shadow-[0_-20px_60px_rgb(14_20_64/42%)] animate-sheet-in motion-reduce:animate-none max-[365px]:px-4"
+        class="mt-auto shrink-0 rounded-t-4xl text-white border border-white/20 bg-white/20 px-5 pb-5 pt-6 shadow-[0_-20px_60px_rgb(14_20_64/42%)] animate-sheet-in motion-reduce:animate-none max-[365px]:px-4"
         aria-labelledby="menu-title"
       >
         <div class="mb-5 flex items-baseline justify-between gap-4">
