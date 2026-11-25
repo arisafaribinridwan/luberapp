@@ -117,15 +117,15 @@ useSeoMeta({ title: 'Kelola Pengguna | Luber' })
         </div>
       </div>
       <div class="relative mt-4">
-        <UIcon
-          name="i-lucide-search"
-          class="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-[#C3CDF9]"
-        /><input
+        <UInput
           v-model="query"
           type="search"
+          icon="i-lucide-search"
+          size="xl"
           placeholder="Cari nama atau ID anggota"
-          class="h-12 w-full rounded-2xl border border-white/20 bg-white/10 pl-11 pr-4 text-sm font-medium text-white placeholder-[#C3CDF9] outline-none transition focus:border-white/60 focus:bg-white/20"
-        >
+          class="w-full"
+          :ui="{ base: 'h-12 rounded-2xl border border-white/20 bg-white/10 pl-11 pr-4 text-sm font-medium text-white placeholder:text-[#C3CDF9] outline-none transition focus:border-white/60 focus:bg-white/20' }"
+        />
       </div>
     </header>
 
@@ -133,10 +133,12 @@ useSeoMeta({ title: 'Kelola Pengguna | Luber' })
       class="flex shrink-0 gap-2 overflow-x-auto px-5 py-4"
       aria-label="Filter tipe anggota"
     >
-      <button
+      <UButton
         v-for="item in filters"
         :key="item.key"
         type="button"
+        :variant="filter === item.key ? 'solid' : 'outline'"
+        :color="filter === item.key ? 'primary' : 'neutral'"
         class="flex h-10 shrink-0 items-center gap-2 rounded-full border px-4 text-sm font-bold transition"
         :class="filter === item.key ? 'border-[#2A41CB] bg-[#2A41CB] text-white' : 'border-[#DFE5FC] bg-white text-slate-700 hover:border-[#99A9F3]'"
         :aria-pressed="filter === item.key"
@@ -146,41 +148,37 @@ useSeoMeta({ title: 'Kelola Pengguna | Luber' })
           class="rounded-full px-2 py-0.5 text-[11px]"
           :class="filter === item.key ? 'bg-white/20' : 'bg-[#EFF2FE] text-[#2234A6]'"
         >{{ item.key === 'ALL' ? total : members.filter(member => member.status === item.key).length }}</span>
-      </button>
+      </UButton>
     </nav>
 
     <section
       class="min-h-0 flex-1 space-y-3 overflow-y-auto px-5 pb-28"
       aria-live="polite"
     >
-      <div
+      <UAlert
         v-if="notice"
+        color="success"
+        variant="soft"
         role="status"
-        class="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs font-semibold text-emerald-800"
-      >
-        <UIcon
-          name="i-lucide-badge-check"
-          class="size-4 text-emerald-600"
-        />{{ notice }}
-      </div>
-      <div
+        icon="i-lucide-badge-check"
+        :description="notice"
+      />
+      <UAlert
         v-if="errorMessage"
+        color="error"
+        variant="soft"
         role="alert"
-        class="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-800"
-      >
-        <UIcon
-          name="i-lucide-circle-alert"
-          class="size-4 text-red-600"
-        />{{ errorMessage }}
-      </div>
+        icon="i-lucide-circle-alert"
+        :description="errorMessage"
+      />
       <div
         v-if="pending"
         class="space-y-3"
       >
-        <div
+        <USkeleton
           v-for="i in 3"
           :key="i"
-          class="h-22 animate-pulse rounded-2xl bg-white/70"
+          class="h-22 rounded-2xl bg-white/70"
         />
       </div>
       <div
@@ -196,13 +194,15 @@ useSeoMeta({ title: 'Kelola Pengguna | Luber' })
           {{ total ? 'Tidak ada anggota yang cocok' : 'Belum ada anggota' }}
         </p><p class="mt-1 text-xs text-slate-500">
           {{ total ? 'Ubah kata kunci atau filter status.' : 'Tambahkan anggota pertama untuk memulai.' }}
-        </p><button
+        </p><UButton
           type="button"
+          color="primary"
+          variant="solid"
           class="mt-4 h-10 rounded-full bg-[#2A41CB] px-5 text-xs font-bold text-white"
           @click="openCreate"
         >
           Tambah pengguna
-        </button>
+        </UButton>
       </div>
       <template v-else>
         <article
@@ -217,18 +217,25 @@ useSeoMeta({ title: 'Kelola Pengguna | Luber' })
             <div class="flex items-center gap-2">
               <h2 class="truncate text-sm font-extrabold text-slate-900">
                 {{ member.name }}
-              </h2><span
+              </h2>
+              <UBadge
+                :color="member.status === 'ACTIVE' ? 'primary' : 'neutral'"
+                variant="soft"
                 class="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold"
-                :class="roleTone(member.status)"
-              >{{ member.status === 'ACTIVE' ? 'Aktif' : 'Nonaktif' }}</span>
+              >
+                {{ member.status === 'ACTIVE' ? 'Aktif' : 'Nonaktif' }}
+              </UBadge>
             </div><p class="mt-0.5 truncate text-xs text-slate-500">
               {{ member.email ?? 'Email belum diisi' }}
             </p><p class="text-xs font-medium text-slate-500">
               {{ formatPhone(member.phone) }}
             </p>
           </div><div class="flex shrink-0">
-            <button
+            <UButton
               type="button"
+              variant="ghost"
+              color="primary"
+              square
               :aria-label="`Aksi untuk ${member.name}`"
               class="grid size-10 place-items-center rounded-xl bg-[#EFF2FE] text-[#2A41CB] transition hover:bg-[#2A41CB] hover:text-white"
               @click="openActions(member)"
@@ -237,14 +244,16 @@ useSeoMeta({ title: 'Kelola Pengguna | Luber' })
                 name="i-lucide-ellipsis-vertical"
                 class="size-5"
               />
-            </button>
+            </UButton>
           </div>
         </article>
       </template>
     </section>
 
-    <button
+    <UButton
       type="button"
+      color="primary"
+      variant="solid"
       class="absolute bottom-[calc(2rem+env(safe-area-inset-bottom))] right-5 z-10 flex h-14 items-center gap-2 rounded-full bg-[#2A41CB] pl-5 pr-6 text-sm font-bold text-white shadow-xl shadow-[#2A41CB]/40 transition hover:bg-[#2234A6] active:scale-95 sm:bottom-6"
       @click="openCreate"
     >
@@ -252,14 +261,14 @@ useSeoMeta({ title: 'Kelola Pengguna | Luber' })
         name="i-lucide-plus"
         class="size-5"
       />Tambah pengguna
-    </button>
+    </UButton>
 
     <UDrawer
       v-model:open="actionDrawerOpen"
       direction="bottom"
       :handle="false"
       :overlay="true"
-      :ui="{ content: 'mx-auto w-full max-w-lg rounded-t-[32px] bg-white' }"
+      :ui="{ content: 'mx-auto w-full max-w-md rounded-t-[32px] bg-white' }"
     >
       <template #body>
         <div
@@ -275,17 +284,23 @@ useSeoMeta({ title: 'Kelola Pengguna | Luber' })
                 {{ actionTarget.name }}
               </h2>
             </div>
-            <button
+            <UButton
               type="button"
+              variant="ghost"
+              color="neutral"
+              square
               aria-label="Tutup menu aksi"
               class="grid size-10 place-items-center rounded-full bg-slate-100 text-slate-600"
               @click="actionDrawerOpen = false"
             >
               <UIcon name="i-lucide-x" />
-            </button>
+            </UButton>
           </div>
-          <button
+          <UButton
             type="button"
+            variant="ghost"
+            color="neutral"
+            block
             class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-bold text-slate-800 transition hover:bg-[#EFF2FE]"
             @click="openEdit"
           >
@@ -294,9 +309,12 @@ useSeoMeta({ title: 'Kelola Pengguna | Luber' })
               class="size-5 text-[#2A41CB]"
             />
             Edit pengguna
-          </button>
-          <button
+          </UButton>
+          <UButton
             type="button"
+            variant="ghost"
+            color="neutral"
+            block
             class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-bold text-slate-800 transition hover:bg-[#EFF2FE]"
             @click="navigateTo(`/admin/user-form?id=${encodeURIComponent(actionTarget.id)}&mode=reset`); actionDrawerOpen = false"
           >
@@ -305,9 +323,12 @@ useSeoMeta({ title: 'Kelola Pengguna | Luber' })
               class="size-5 text-[#2A41CB]"
             />
             Reset password
-          </button>
-          <button
+          </UButton>
+          <UButton
             type="button"
+            variant="ghost"
+            color="error"
+            block
             class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-bold text-rose-600 transition hover:bg-rose-50"
             @click="requestDelete"
           >
@@ -316,7 +337,7 @@ useSeoMeta({ title: 'Kelola Pengguna | Luber' })
               class="size-5"
             />
             Hapus pengguna
-          </button>
+          </UButton>
         </div>
       </template>
     </UDrawer>
@@ -342,20 +363,26 @@ useSeoMeta({ title: 'Kelola Pengguna | Luber' })
           </h2><p class="mt-1 text-xs leading-relaxed text-slate-500">
             {{ deactivateTarget.name }} {{ deactivateTarget.status === 'ACTIVE' ? 'tidak dapat dipilih untuk transaksi baru.' : 'dapat dipilih kembali untuk transaksi.' }}
           </p><div class="mt-5 grid grid-cols-2 gap-2">
-            <button
+            <UButton
               type="button"
+              variant="soft"
+              color="neutral"
+              block
               class="rounded-xl bg-slate-100 py-3 text-xs font-bold text-slate-700"
               @click="deactivateTarget = null"
             >
               Batal
-            </button><button
+            </UButton><UButton
               type="button"
               :disabled="saving"
+              variant="solid"
+              color="error"
+              block
               class="rounded-xl bg-rose-600 py-3 text-xs font-bold text-white disabled:opacity-50"
               @click="toggleStatus"
             >
               Ya, lanjutkan
-            </button>
+            </UButton>
           </div>
         </div>
       </template>

@@ -12,8 +12,9 @@ const errorMessage = shallowRef('')
 const notice = shallowRef('')
 const photoPreview = shallowRef('')
 const photoInput = shallowRef<HTMLInputElement | null>(null)
-const form = reactive({ id: '', name: '', email: '', phone: '', role: 'member' as 'admin' | 'pengurus' | 'member', password: '' })
-const resetForm = reactive({ password: 'luber123' })
+const defaultPassword = 'luber123'
+const form = reactive({ id: '', name: '', email: '', phone: '', role: 'member' as 'admin' | 'pengurus' | 'member', password: defaultPassword })
+const resetForm = reactive({ password: defaultPassword })
 
 const createUserSchema = z.object({
   name: z.string().trim().min(3, 'Nama lengkap minimal 3 karakter.'),
@@ -130,7 +131,7 @@ useSeoMeta({ title: computed(() => editing.value ? 'Ubah Pengguna | Luber' : 'Ta
       v-if="pending"
       class="p-5"
     >
-      <div class="h-96 animate-pulse rounded-3xl bg-white/70" />
+      <USkeleton class="h-96 rounded-3xl bg-white/70" />
     </div>
     <UForm
       v-if="isReset && editing"
@@ -151,20 +152,23 @@ useSeoMeta({ title: computed(() => editing.value ? 'Ubah Pengguna | Luber' : 'Ta
           placeholder="Minimal 8 karakter"
         />
       </UFormField>
-      <button
+      <UButton
         type="submit"
         :disabled="saving"
+        variant="solid"
+        color="primary"
         class="mt-6 h-12 w-full rounded-2xl bg-[#2A41CB] text-sm font-bold text-white shadow-lg shadow-[#2A41CB]/30 disabled:opacity-50"
       >
         {{ saving ? 'Menyimpan...' : 'Reset password' }}
-      </button>
-      <p
+      </UButton>
+      <UAlert
         v-if="errorMessage"
+        color="error"
+        variant="soft"
         role="alert"
-        class="mt-3 text-sm font-semibold text-red-700"
-      >
-        {{ errorMessage }}
-      </p>
+        :description="errorMessage"
+        class="mt-3"
+      />
     </UForm>
     <UForm
       v-else
@@ -173,23 +177,12 @@ useSeoMeta({ title: computed(() => editing.value ? 'Ubah Pengguna | Luber' : 'Ta
       class="px-5 pb-8 pt-5"
       @submit="saveMember"
     >
-      <div class="mb-5 flex items-center justify-between">
-        <h2 class="text-xl font-extrabold text-slate-900">
-          {{ editing ? 'Ubah pengguna' : 'Tambah pengguna' }}
-        </h2><button
-          type="button"
-          aria-label="Tutup formulir"
-          class="grid size-10 place-items-center rounded-full bg-slate-100 text-slate-600"
-          @click="navigateTo('/admin/users')"
-        >
-          <UIcon name="i-lucide-x" />
-        </button>
-      </div>
-
       <div class="mb-5 flex items-center gap-4">
         <div class="relative">
-          <button
+          <UButton
             type="button"
+            variant="ghost"
+            color="neutral"
             class="grid size-22 place-items-center overflow-hidden rounded-3xl bg-[#DFE5FC] text-[#2A41CB]"
             aria-label="Pilih foto profil"
             @click="selectPhoto"
@@ -205,9 +198,11 @@ useSeoMeta({ title: computed(() => editing.value ? 'Ubah Pengguna | Luber' : 'Ta
               name="i-lucide-user-round"
               class="size-11"
             />
-          </button>
-          <button
+          </UButton>
+          <UButton
             type="button"
+            variant="solid"
+            color="primary"
             class="absolute -bottom-1.5 -right-1.5 grid size-9 place-items-center rounded-full bg-[#2A41CB] text-white ring-4 ring-white"
             aria-label="Pilih foto profil"
             @click="selectPhoto"
@@ -216,7 +211,7 @@ useSeoMeta({ title: computed(() => editing.value ? 'Ubah Pengguna | Luber' : 'Ta
               name="i-lucide-camera"
               class="size-4"
             />
-          </button>
+          </UButton>
           <input
             ref="photoInput"
             type="file"
@@ -228,16 +223,20 @@ useSeoMeta({ title: computed(() => editing.value ? 'Ubah Pengguna | Luber' : 'Ta
         <div class="min-w-0">
           <p class="text-sm font-bold text-slate-900">
             Foto profil
-          </p><p class="mt-0.5 text-xs text-slate-500">
+          </p>
+          <p class="mt-0.5 text-xs text-slate-500">
             JPG atau PNG. Otomatis dipangkas persegi.
-          </p><button
+          </p>
+          <UButton
             v-if="photoPreview"
             type="button"
+            variant="link"
+            color="error"
             class="mt-1.5 text-xs font-bold text-rose-600"
             @click="photoPreview = ''"
           >
             Hapus foto
-          </button>
+          </UButton>
         </div>
       </div>
 
@@ -282,10 +281,12 @@ useSeoMeta({ title: computed(() => editing.value ? 'Ubah Pengguna | Luber' : 'Ta
           name="role"
         >
           <div class="grid grid-cols-3 gap-2">
-            <button
+            <UButton
               v-for="option in roleOptions"
               :key="option.value"
               type="button"
+              variant="ghost"
+              color="neutral"
               class="flex min-h-22 flex-col items-center justify-center rounded-2xl border px-1 text-center transition"
               :class="form.role === option.value ? 'border-[#2A41CB] bg-[#EFF2FE] text-[#1F2E85] ring-1 ring-[#2A41CB]' : 'border-slate-200 text-slate-900 hover:border-[#99A9F3]'"
               @click="form.role = option.value"
@@ -294,52 +295,47 @@ useSeoMeta({ title: computed(() => editing.value ? 'Ubah Pengguna | Luber' : 'Ta
                 :name="option.icon"
                 class="size-5 text-[#2A41CB]"
               /><span class="mt-1 text-xs font-bold">{{ option.label }}</span><span class="text-[10px] text-slate-500">{{ option.description }}</span>
-            </button>
+            </UButton>
           </div>
-        </UFormField>
-        <UFormField
-          label="Password"
-          name="password"
-        >
-          <UInput
-            v-model="form.password"
-            class="w-full"
-            size="xl"
-            type="password"
-            placeholder="Minimal 8 karakter"
-          />
         </UFormField>
       </div>
 
       <div class="mt-6 grid grid-cols-2 gap-2">
-        <button
+        <UButton
           type="button"
-          class="h-12 rounded-2xl bg-slate-100 text-sm font-bold text-slate-700"
+          variant="subtle"
+          color="neutral"
+          class="h-12 justify-center rounded-2xl bg-slate-100 text-center text-sm font-bold text-slate-700"
           @click="navigateTo('/admin/users')"
         >
           Batal
-        </button><button
+        </UButton>
+        <UButton
           type="submit"
           :disabled="saving"
-          class="h-12 rounded-2xl bg-[#2A41CB] text-sm font-bold text-white shadow-lg shadow-[#2A41CB]/30 disabled:opacity-50"
+          variant="solid"
+          color="primary"
+          class="h-12 justify-center rounded-2xl bg-[#2A41CB] text-center text-sm font-bold text-white shadow-lg shadow-[#2A41CB]/30 disabled:opacity-50"
         >
           {{ saving ? 'Menyimpan...' : editing ? 'Simpan perubahan' : 'Tambah pengguna' }}
-        </button>
+        </UButton>
       </div>
-      <p
+      <UAlert
         v-if="notice"
+        color="success"
+        variant="soft"
         role="status"
-        class="mt-3 text-sm font-semibold text-emerald-700"
-      >
-        {{ notice }}
-      </p>
-      <p
+        :description="notice"
+        class="mt-3"
+      />
+      <UAlert
         v-if="errorMessage"
+        color="error"
+        variant="soft"
         role="alert"
-        class="mt-3 text-sm font-semibold text-red-700"
-      >
-        {{ errorMessage }}
-      </p>
+        :description="errorMessage"
+        class="mt-3"
+      />
     </UForm>
   </main>
 </template>
