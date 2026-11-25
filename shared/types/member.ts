@@ -5,6 +5,7 @@ export type MemberDto = {
   userId: string | null
   name: string
   email: string | null
+  image: string | null
   role: 'admin' | 'pengurus' | 'member' | null
   phone: string | null
   status: MemberStatus

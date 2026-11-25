@@ -290,10 +290,18 @@ useSeoMeta({ title: 'Kelola Pengguna | Luber' })
           class="flex items-center gap-3 rounded-2xl border border-[#DFE5FC]/70 bg-white p-3 shadow-sm"
         >
           <span
-            class="grid size-14 shrink-0 place-items-center rounded-2xl text-base font-extrabold"
+            class="grid size-14 shrink-0 place-items-center overflow-hidden rounded-2xl text-base font-extrabold"
             :class="avatarTone(member.status)"
           >
-            {{ initials(member.name) }}
+            <img
+              v-if="member.image"
+              :src="member.image"
+              :alt="`Foto ${member.name}`"
+              class="size-full object-cover"
+            >
+            <template v-else>
+              {{ initials(member.name) }}
+            </template>
           </span>
           <div class="min-w-0 flex-1">
             <div class="flex items-center gap-2">

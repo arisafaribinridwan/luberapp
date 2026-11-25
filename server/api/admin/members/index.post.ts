@@ -14,7 +14,8 @@ export default defineEventHandler(async (event) => {
       email: input.email,
       name: input.name,
       password: input.password,
-      role: input.role
+      role: input.role,
+      data: { image: input.image }
     },
     headers
   })

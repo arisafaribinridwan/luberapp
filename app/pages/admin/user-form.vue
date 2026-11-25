@@ -43,6 +43,7 @@ async function loadEditingMember() {
     const found = result.items.find(item => item.id === id)
     if (!found) throw new Error('Anggota tidak ditemukan')
     editing.value = found
+    photoPreview.value = found.image ?? ''
     Object.assign(form, { id: found.id, name: found.name, email: found.email ?? '', phone: found.phone ?? '', role: found.role ?? 'member', password: '' })
   } catch {
     errorMessage.value = 'Data pengguna tidak dapat dimuat.'
@@ -55,17 +56,46 @@ function selectPhoto() {
   photoInput.value?.click()
 }
 function handlePhoto(event: Event) {
-  const file = (event.target as HTMLInputElement).files?.[0]
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
   if (!file) return
-  if (!file.type.startsWith('image/')) {
-    errorMessage.value = 'Foto profil harus berupa gambar.'
+  const allowedPhotoTypes = ['image/jpeg', 'image/png']
+  if (!allowedPhotoTypes.includes(file.type)) {
+    errorMessage.value = 'Foto profil hanya boleh berupa JPG, JPEG, atau PNG.'
+    input.value = ''
     return
   }
-  const reader = new FileReader()
-  reader.onload = () => {
-    photoPreview.value = String(reader.result ?? '')
+  errorMessage.value = ''
+  const image = new Image()
+  const objectUrl = URL.createObjectURL(file)
+  image.onload = () => {
+    const size = Math.min(image.naturalWidth, image.naturalHeight)
+    const canvas = document.createElement('canvas')
+    canvas.width = 256
+    canvas.height = 256
+    canvas.getContext('2d')?.drawImage(
+      image,
+      (image.naturalWidth - size) / 2,
+      (image.naturalHeight - size) / 2,
+      size,
+      size,
+      0,
+      0,
+      256,
+      256
+    )
+    photoPreview.value = canvas.toDataURL(file.type)
+    URL.revokeObjectURL(objectUrl)
   }
-  reader.readAsDataURL(file)
+  image.onerror = () => {
+    errorMessage.value = 'Foto tidak dapat dibaca. Coba file lain.'
+    URL.revokeObjectURL(objectUrl)
+  }
+  image.src = objectUrl
+}
+function removePhoto() {
+  photoPreview.value = ''
+  if (photoInput.value) photoInput.value.value = ''
 }
 
 async function saveMember(event: FormSubmitEvent<{ name: string, phone: string, role: UserForm['role'], email?: string, password?: string }>) {
@@ -74,10 +104,10 @@ async function saveMember(event: FormSubmitEvent<{ name: string, phone: string, 
   errorMessage.value = ''
   try {
     if (editing.value) {
-      await $fetch(`/api/admin/members/${encodeURIComponent(editing.value.id)}`, { method: 'PATCH', body: { name: event.data.name, phone: event.data.phone, role: event.data.role } })
+      await $fetch(`/api/admin/members/${encodeURIComponent(editing.value.id)}`, { method: 'PATCH', body: { name: event.data.name, phone: event.data.phone, role: event.data.role, image: photoPreview.value || null } })
       notice.value = 'Data anggota berhasil diperbarui.'
     } else {
-      await $fetch('/api/admin/members', { method: 'POST', body: { id: form.id || `USR-${Date.now().toString(36).toUpperCase()}`, name: event.data.name, email: event.data.email, phone: event.data.phone, password: event.data.password, role: event.data.role } })
+      await $fetch('/api/admin/members', { method: 'POST', body: { id: form.id || `USR-${Date.now().toString(36).toUpperCase()}`, name: event.data.name, email: event.data.email, phone: event.data.phone, password: event.data.password, role: event.data.role, image: photoPreview.value || null } })
       notice.value = 'Anggota baru berhasil ditambahkan.'
     }
     await navigateTo('/admin/users')
@@ -215,7 +245,7 @@ useSeoMeta({ title: computed(() => editing.value ? 'Ubah Pengguna | Luber' : 'Ta
           <input
             ref="photoInput"
             type="file"
-            accept="image/png,image/jpeg"
+            accept="image/jpeg,image/png"
             class="hidden"
             @change="handlePhoto"
           >
@@ -233,7 +263,7 @@ useSeoMeta({ title: computed(() => editing.value ? 'Ubah Pengguna | Luber' : 'Ta
             variant="link"
             color="error"
             class="mt-1.5 text-xs font-bold text-rose-600"
-            @click="photoPreview = ''"
+            @click="removePhoto"
           >
             Hapus foto
           </UButton>

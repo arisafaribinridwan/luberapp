@@ -20,12 +20,23 @@ function parse<T extends z.ZodType>(schema: T, input: unknown): z.infer<T> {
 }
 
 // Pipe: trim + lowercase DULU, baru validasi email (z.email().trim() memvalidasi sebelum trim).
+const memberImageSchema = z.string()
+  .trim()
+  .max(2_000_000, 'Foto profil terlalu besar.')
+  .refine(value => !value.startsWith('data:') || /^data:image\/(?:jpeg|png);base64,/.test(value), 'Foto profil hanya boleh berupa JPG, JPEG, atau PNG.')
+  .nullable()
+  .optional()
+  .transform(value => value || null)
+
 const createMemberSchema = insertMemberSchema.extend({
   email: z.string().trim().toLowerCase().pipe(z.email('Format email belum benar.')),
   password: z.string().min(8, 'Password minimal 8 karakter.').max(128, 'Password terlalu panjang.'),
-  role: z.enum(USER_ROLES)
+  role: z.enum(USER_ROLES),
+  image: memberImageSchema
 })
 export type CreateMemberInput = z.infer<typeof createMemberSchema>
+
+export const normalizeMemberImage = (input: unknown) => parse(memberImageSchema, input)
 
 export const normalizeMemberInput = (input: unknown): InsertMember => parse(insertMemberSchema, input)
 export const normalizeMemberCreate = (input: unknown): CreateMemberInput => parse(createMemberSchema, input)

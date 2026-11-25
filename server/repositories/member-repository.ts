@@ -23,6 +23,7 @@ export async function listMembers({ q, status, page, limit }: MemberFilters) {
       userId: member.userId,
       name: member.name,
       email: user.email,
+      image: user.image,
       role: user.role,
       phone: member.phone,
       status: member.status,
