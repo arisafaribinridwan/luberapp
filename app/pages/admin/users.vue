@@ -132,6 +132,28 @@ const initials = (name: string) =>
   name.trim().split(/\s+/).slice(0, 2).map(part => part[0]).join('').toUpperCase() || '?'
 const avatarTone = (s: MemberStatus) => s === 'ACTIVE' ? 'bg-[#2A41CB] text-white' : 'bg-slate-100 text-slate-600'
 const formatPhone = (phone: string | null) => phone?.replace(/(\d{4})(?=\d)/g, '$1 ') || 'Nomor telepon belum diisi'
+const membershipLabel = (role: MemberDto['role']) => {
+  switch (role) {
+    case 'admin':
+      return 'Admin'
+    case 'pengurus':
+      return 'Pengurus'
+    case 'member':
+    default:
+      return 'Member'
+  }
+}
+const membershipColor = (role: MemberDto['role']) => {
+  switch (role) {
+    case 'admin':
+      return 'primary' as const
+    case 'pengurus':
+      return 'success' as const
+    case 'member':
+    default:
+      return 'neutral' as const
+  }
+}
 
 useSeoMeta({ title: 'Kelola Pengguna | Luber' })
 </script>
@@ -279,11 +301,11 @@ useSeoMeta({ title: 'Kelola Pengguna | Luber' })
                 {{ member.name }}
               </h2>
               <UBadge
-                :color="member.status === 'ACTIVE' ? 'primary' : 'neutral'"
+                :color="membershipColor(member.role)"
                 variant="soft"
                 class="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold"
               >
-                {{ member.status === 'ACTIVE' ? 'Aktif' : 'Nonaktif' }}
+                {{ membershipLabel(member.role) }}
               </UBadge>
             </div>
             <p class="mt-0.5 truncate text-xs text-slate-500">
