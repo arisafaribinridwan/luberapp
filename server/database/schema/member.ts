@@ -21,7 +21,11 @@ export const member = sqliteTable(
       .$onUpdate(() => new Date())
       .notNull()
   },
-  table => [index('member_status_idx').on(table.status), index('member_user_idx').on(table.userId), uniqueIndex('member_user_unique').on(table.userId)]
+  table => [
+    index('member_status_name_idx').on(table.status, table.name), // filter status + ORDER BY name
+    index('member_name_idx').on(table.name), // ORDER BY name tanpa filter status
+    uniqueIndex('member_user_unique').on(table.userId)
+  ]
 )
 
 export const insertMemberSchema = createInsertSchema(member, {

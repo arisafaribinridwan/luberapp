@@ -1,16 +1,24 @@
-import { getQuery, createError } from 'h3'
+import { z } from 'zod'
+import { MEMBER_STATUSES } from '../../../database/schema/constants'
 import { listMembers } from '../../../repositories/member-repository'
-import { MEMBER_STATUSES, type MemberStatus } from '../../../database/schema'
+
+const querySchema = z.object({
+  q: z.string().trim().max(100).optional().transform(v => v || undefined),
+  status: z.enum(MEMBER_STATUSES).optional(),
+  page: z.coerce.number().int().min(1).max(10_000).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20)
+})
 
 export default defineEventHandler(async (event) => {
   await requireRole(event, 'admin')
-  const query = getQuery(event)
-  const rawPage = String(query.page ?? '1')
-  const rawLimit = String(query.limit ?? '20')
-  const page = /^\d+$/.test(rawPage) ? Number(rawPage) : 1
-  const limit = /^\d+$/.test(rawLimit) ? Math.min(Number(rawLimit), 100) : 20
-  if (page < 1 || limit < 1) throw createError({ statusCode: 400, statusMessage: 'Pagination tidak valid' })
-  const status = typeof query.status === 'string' && MEMBER_STATUSES.includes(query.status as MemberStatus) ? query.status as MemberStatus : undefined
-  if (query.status && !status) throw createError({ statusCode: 400, statusMessage: 'Status tidak valid' })
-  return listMembers({ q: typeof query.q === 'string' ? query.q.trim().slice(0, 100) : undefined, status, page, limit })
+
+  const parsed = await getValidatedQuery(event, input => querySchema.safeParse(input))
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0]
+    throw createError({ statusCode: 400, statusMessage: `${issue?.path.join('.') || 'query'}: ${issue?.message ?? 'tidak valid'}` })
+  }
+
+  // Data admin berisi email/role: jangan pernah di-cache oleh CDN/proxy bersama.
+  setHeader(event, 'Cache-Control', 'private, no-store')
+  return listMembers(parsed.data)
 })
