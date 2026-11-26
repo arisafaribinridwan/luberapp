@@ -57,3 +57,7 @@ To maintain context efficiency, refer to specialized documentation in `.doc/`:
 - ❌ **No Inline SQL / Raw String Queries**: Always use Drizzle ORM type-safe query builders.
 - ❌ **No Hardcoded Secrets**: Use Nuxt `runtimeConfig` and `.env` exclusively.
 - ❌ **No Drive-By Refactoring**: Do not touch unreferenced files or reformat clean legacy code.
+
+## Tambahan
+
+- Update dokumentasi internal `.doc/` jika ada perubahan signifikan pada arsitektur, alur data, atau dependensi.
