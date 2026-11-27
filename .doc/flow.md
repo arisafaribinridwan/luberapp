@@ -6,6 +6,8 @@
 
 UI menggunakan pendekatan mobile-first. Jika dibuka pada viewport desktop, aplikasi tetap menampilkan shell dengan lebar maksimum seperti aplikasi mobile dan berada di tengah layar; komponen dapat memakai ruang desktop secara bertahap tanpa mengubah alur utama mobile.
 
+Halaman terautentikasi menggunakan layout Nuxt `app/layouts/default.vue` untuk header, navigasi bawah, dan slot konten. Konfigurasi judul serta tombol kembali diteruskan dari halaman melalui `definePageMeta` layout props. Halaman welcome, login, dan two-factor memakai `layout: false` karena memiliki shell publik sendiri.
+
 Aplikasi tersedia sebagai Progressive Web App (PWA) dan dapat dipasang dari browser melalui HTTPS. Saat aplikasi dibuka, service worker memuat asset shell yang sudah dicache, lalu alur autentikasi berjalan sebagai berikut:
 
 Semua pengguna wajib melewati alur berikut:

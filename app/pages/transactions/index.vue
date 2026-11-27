@@ -1,14 +1,15 @@
 <script setup lang="ts">
 useSeoMeta({ title: 'Pencatatan Transaksi | Luber' })
+
+definePageMeta({
+  layout: {
+    name: 'default'
+  }
+})
 </script>
 
 <template>
-  <AppShell
-    title="Pencatatan Transaksi"
-    subtitle="Kas masuk, kas keluar & beban operasional"
-    back-to="/"
-    back-label="Kembali ke Launchpad"
-  >
+  <div>
     <div class="px-5 py-6">
       <div class="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs text-center">
         <div class="mx-auto flex size-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
@@ -36,5 +37,5 @@ useSeoMeta({ title: 'Pencatatan Transaksi | Luber' })
         </NuxtLink>
       </div>
     </div>
-  </AppShell>
+  </div>
 </template>

@@ -1,14 +1,21 @@
 <script setup lang="ts">
 useSeoMeta({ title: 'Dashboard Keuangan | Luber' })
+
+definePageMeta({
+  layout: {
+    name: 'default',
+    props: {
+      title: 'Dashboard Keuangan',
+      subtitle: 'Ringkasan kas, piutang, hibah & defisit',
+      backTo: '/',
+      backLabel: 'Kembali ke Launchpad'
+    }
+  }
+})
 </script>
 
 <template>
-  <AppShell
-    title="Dashboard Keuangan"
-    subtitle="Ringkasan kas, piutang, hibah & defisit"
-    back-to="/"
-    back-label="Kembali ke Launchpad"
-  >
+  <div>
     <div class="px-5 py-6">
       <div class="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs text-center">
         <div class="mx-auto flex size-14 items-center justify-center rounded-2xl bg-blue-50 text-[#2A41CB]">
@@ -36,5 +43,5 @@ useSeoMeta({ title: 'Dashboard Keuangan | Luber' })
         </NuxtLink>
       </div>
     </div>
-  </AppShell>
+  </div>
 </template>

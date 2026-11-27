@@ -1,14 +1,21 @@
 <script setup lang="ts">
 useSeoMeta({ title: 'Transfer Antar Rekening | Luber' })
+
+definePageMeta({
+  layout: {
+    name: 'default',
+    props: {
+      title: 'Transfer Rekening Pusat',
+      subtitle: 'Pemindahan internal antar rekening fisik',
+      backTo: '/',
+      backLabel: 'Kembali ke Launchpad'
+    }
+  }
+})
 </script>
 
 <template>
-  <AppShell
-    title="Transfer Rekening Pusat"
-    subtitle="Pemindahan internal antar rekening fisik"
-    back-to="/"
-    back-label="Kembali ke Launchpad"
-  >
+  <div>
     <div class="px-5 py-6">
       <div class="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs text-center">
         <div class="mx-auto flex size-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
@@ -36,5 +43,5 @@ useSeoMeta({ title: 'Transfer Antar Rekening | Luber' })
         </NuxtLink>
       </div>
     </div>
-  </AppShell>
+  </div>
 </template>
