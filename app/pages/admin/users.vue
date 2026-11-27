@@ -2,6 +2,8 @@
 import type { MemberDto, MemberListResponse } from '~~/shared/types/member'
 import type { MemberStatus } from '~~/server/database/schema/constants'
 
+definePageMeta({ layout: false })
+
 const LIMIT = 25
 const SEARCH_DEBOUNCE_MS = 300
 

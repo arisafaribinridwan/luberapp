@@ -2,10 +2,26 @@
 const email = shallowRef('')
 const password = shallowRef('')
 const showPassword = shallowRef(false)
-const { execute, status, error } = useSignIn('email')
+const pending = shallowRef(false)
+const errorMessage = shallowRef('')
+const client = useAuthClient()
 
 async function submit() {
-  await execute({ email: email.value, password: password.value })
+  if (!client || pending.value) return
+  pending.value = true
+  errorMessage.value = ''
+  try {
+    const result = await client.signIn.email({ email: email.value, password: password.value })
+    if (result.error) {
+      errorMessage.value = result.error.message ?? 'Login gagal. Periksa email dan password.'
+      return
+    }
+    await navigateTo('/')
+  } catch {
+    errorMessage.value = 'Login gagal. Periksa email dan password.'
+  } finally {
+    pending.value = false
+  }
 }
 </script>
 
@@ -58,16 +74,16 @@ async function submit() {
     <button
       type="submit"
       class="mt-12 flex min-h-12 items-center justify-center rounded-lg bg-[#2A41CB] px-4 text-sm font-semibold text-white hover:bg-[#2439B5] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[#12192F] disabled:opacity-50"
-      :disabled="status === 'pending'"
+      :disabled="pending"
     >
-      {{ status === 'pending' ? 'Memproses...' : 'Login' }}
+      {{ pending ? 'Memproses...' : 'Login' }}
     </button>
     <p
-      v-if="error"
+      v-if="errorMessage"
       role="alert"
       class="mt-3 text-sm text-error"
     >
-      {{ error.message }}
+      {{ errorMessage }}
     </p>
     <p class="mt-3 text-sm text-[#737B86] text-center">
       Lupa password? Hubungi admin

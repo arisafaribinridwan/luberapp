@@ -1,11 +1,15 @@
 import { mkdirSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { createClient } from '@libsql/client'
 
-const url = process.env.DATABASE_URL || 'file:.data/sqlite.db'
+const configuredUrl = process.env.DATABASE_URL || 'file:.data/sqlite.db'
+const url = configuredUrl.startsWith('file:')
+  ? `file:${resolve(process.cwd(), configuredUrl.slice('file:'.length))}`
+  : configuredUrl
 const isLocalFile = url.startsWith('file:')
 
-if (url.startsWith('file:.data/')) {
-  mkdirSync('.data', { recursive: true })
+if (isLocalFile) {
+  mkdirSync(resolve(process.cwd(), '.data'), { recursive: true })
 }
 
 export const client = createClient({
