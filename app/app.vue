@@ -22,11 +22,11 @@ useSeoMeta({
 <template>
   <UApp>
     <!-- 1. Canvas Layar Luar (Background desktop, flex center) -->
-    <div class="min-h-screen w-full bg-slate-100 flex justify-center items-center">
-      <!-- 2. Mobile Container Utama (Terkunci max-w-md & h-screen / h-[92vh]) -->
-      <div class="w-full max-w-md h-screen sm:h-[92vh] bg-[#F7F8FA] sm:rounded-4xl shadow-xl flex flex-col overflow-hidden relative">
+    <div class="min-h-dvh w-full bg-slate-100 flex justify-center items-center">
+      <!-- 2. Mobile Container Utama (Terkunci max-w-md & h-dvh / h-[92vh]) -->
+      <div class="w-full max-w-md h-dvh sm:h-[92vh] bg-[#F7F8FA] sm:rounded-4xl shadow-xl flex min-h-0 flex-col overflow-hidden relative">
         <!-- 3. Area konten utama yang bisa di-scroll -->
-        <main class="flex-1 overflow-y-auto scrollbar-none">
+        <main class="min-h-0 flex-1 overflow-y-auto scrollbar-none">
           <NuxtLayout>
             <NuxtPage />
           </NuxtLayout>

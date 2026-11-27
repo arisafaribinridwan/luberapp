@@ -115,7 +115,7 @@ const menuToneClasses = (tone: MenuItem['tone']) => ({
 </script>
 
 <template>
-  <main class="relative flex flex-1 min-h-full w-full overflow-hidden bg-[#1c2868]">
+  <main class="relative flex h-dvh min-h-0 w-full flex-1 overflow-hidden bg-[#1c2868] sm:h-full">
     <div
       class="absolute inset-0 overflow-hidden bg-[linear-gradient(170deg,rgb(10_25_58/70%)_0%,rgb(24_54_112/64%)_45%,rgb(5_12_30/92%)_100%),url('/donny-jiang-42gFAgdIUC8-unsplash.jpg')] bg-cover bg-center"
       aria-hidden="true"

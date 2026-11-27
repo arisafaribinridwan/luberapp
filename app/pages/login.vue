@@ -5,7 +5,7 @@ definePageMeta({ layout: false })
 </script>
 
 <template>
-  <main class="mx-auto flex min-h-dvh w-full max-w-sm flex-col pt-10 pb-16 justify-between">
+  <main class="mx-auto flex h-full min-h-0 w-full max-w-sm flex-col justify-between px-6 pt-10 pb-16">
     <!-- Top Back to Welcome Screen -->
     <div>
       <header class="mt-8">
