@@ -21,9 +21,17 @@ useSeoMeta({
 
 <template>
   <UApp>
-    <div class="mx-auto my-0 min-h-dvh w-full max-w-md sm:max-w-lg bg-[#F7F8FA] shadow-xl sm:border-x sm:border-slate-200/80 flex flex-col">
-      <NuxtPage />
+    <!-- 1. Canvas Layar Luar (Background desktop, flex center) -->
+    <div class="min-h-screen w-full bg-slate-100 flex justify-center items-center">
+      <!-- 2. Mobile Container Utama (Terkunci max-w-md & h-screen / h-[92vh]) -->
+      <div class="w-full max-w-md h-screen sm:h-[92vh] bg-[#F7F8FA] sm:rounded-4xl shadow-xl flex flex-col overflow-hidden relative">
+        <!-- 3. Area konten utama yang bisa di-scroll -->
+        <main class="flex-1 overflow-y-auto scrollbar-none">
+          <NuxtPage />
+        </main>
+      </div>
     </div>
+
     <PwaUpdateNotice />
   </UApp>
 </template>

@@ -166,17 +166,17 @@ const menuToneClasses = (tone: MenuItem['tone']) => ({
       </section>
 
       <section
-        class="mt-auto shrink-0 rounded-t-4xl bg-white px-5 pb-5 pt-6 shadow-[0_-20px_60px_rgb(14_20_64/42%)] animate-sheet-in motion-reduce:animate-none max-[365px]:px-4"
+        class="mt-auto shrink-0 rounded-t-4xl text-white border border-white/20 bg-white/20 px-5 pb-5 pt-6 shadow-[0_-20px_60px_rgb(14_20_64/42%)] animate-sheet-in motion-reduce:animate-none max-[365px]:px-4"
         aria-labelledby="menu-title"
       >
         <div class="mb-5 flex items-baseline justify-between gap-4">
           <h2
             id="menu-title"
-            class="m-0 text-base font-extrabold text-slate-900"
+            class="m-0 text-base font-extrabold "
           >
             Menu utama
           </h2>
-          <span class="text-[0.6875rem] font-semibold text-slate-500">Pilih layanan</span>
+          <span class="text-[0.6875rem] font-semibold ">Pilih layanan</span>
         </div>
 
         <nav
@@ -199,7 +199,7 @@ const menuToneClasses = (tone: MenuItem['tone']) => ({
                 aria-hidden="true"
               />
             </span>
-            <span class="max-w-21 text-center text-[0.6875rem] font-bold leading-[1.15] text-slate-700">{{ item.label }}</span>
+            <span class="max-w-21 text-center text-[0.6875rem] font-bold leading-[1.15]">{{ item.label }}</span>
           </NuxtLink>
         </nav>
 
