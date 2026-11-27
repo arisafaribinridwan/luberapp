@@ -1,14 +1,21 @@
 <script setup lang="ts">
 useSeoMeta({ title: 'Data Anggota & Mutasi | Luber' })
+
+definePageMeta({
+  layout: {
+    name: 'default',
+    props: {
+      title: 'Data Anggota & Mutasi',
+      subtitle: 'Pencarian anggota & saldo simpanan',
+      backTo: '/',
+      backLabel: 'Kembali ke Launchpad'
+    }
+  }
+})
 </script>
 
 <template>
-  <AppShell
-    title="Data Anggota & Mutasi"
-    subtitle="Pencarian anggota & saldo simpanan"
-    back-to="/"
-    back-label="Kembali ke Launchpad"
-  >
+  <div>
     <div class="px-5 py-6">
       <div class="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs text-center">
         <div class="mx-auto flex size-14 items-center justify-center rounded-2xl bg-sky-50 text-sky-600">
@@ -36,5 +43,5 @@ useSeoMeta({ title: 'Data Anggota & Mutasi | Luber' })
         </NuxtLink>
       </div>
     </div>
-  </AppShell>
+  </div>
 </template>

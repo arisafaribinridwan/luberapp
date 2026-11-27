@@ -8,7 +8,7 @@ interface Props {
   hideBottomNav?: boolean
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   title: '',
   subtitle: '',
   showBack: true,
@@ -82,10 +82,10 @@ function isNavActive(item: { to: string, exact: boolean }) {
     <header class="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200/80 bg-white/95 px-4 py-3 backdrop-blur-md">
       <div class="flex items-center gap-3">
         <NuxtLink
-          v-if="showBack"
-          :to="backTo"
+          v-if="props.showBack"
+          :to="props.backTo"
           class="flex size-9 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-700 transition-colors hover:bg-slate-100 hover:text-[#2A41CB] active:scale-95 focus-visible:outline-2 focus-visible:outline-[#2A41CB]"
-          :aria-label="backLabel"
+          :aria-label="props.backLabel"
         >
           <UIcon
             name="i-lucide-arrow-left"
@@ -95,10 +95,10 @@ function isNavActive(item: { to: string, exact: boolean }) {
 
         <div>
           <h1
-            v-if="title"
+            v-if="props.title"
             class="text-base font-bold leading-tight text-[#0C2541]"
           >
-            {{ title }}
+            {{ props.title }}
           </h1>
           <NuxtLink
             v-else
@@ -112,10 +112,10 @@ function isNavActive(item: { to: string, exact: boolean }) {
             >
           </NuxtLink>
           <p
-            v-if="subtitle"
+            v-if="props.subtitle"
             class="text-xs text-slate-500"
           >
-            {{ subtitle }}
+            {{ props.subtitle }}
           </p>
         </div>
       </div>
@@ -152,7 +152,7 @@ function isNavActive(item: { to: string, exact: boolean }) {
 
     <!-- Bottom Navigation Bar for Mobile-First Flow -->
     <nav
-      v-if="!hideBottomNav"
+      v-if="!props.hideBottomNav"
       class="fixed bottom-0 z-30 w-full max-w-md sm:max-w-lg border-t border-slate-200/80 bg-white/95 backdrop-blur-md"
       aria-label="Navigasi Utama"
     >

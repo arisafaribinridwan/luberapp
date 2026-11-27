@@ -1,5 +1,7 @@
 <script setup lang="ts">
 useSeoMeta({ title: 'Masuk | Luber' })
+
+definePageMeta({ layout: false })
 </script>
 
 <template>

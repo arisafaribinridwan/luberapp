@@ -1,5 +1,7 @@
 <script setup lang="ts">
 useSeoMeta({ title: 'Verifikasi Dua Langkah | Luber' })
+
+definePageMeta({ layout: false })
 </script>
 
 <template>

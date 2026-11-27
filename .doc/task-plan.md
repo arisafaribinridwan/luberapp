@@ -131,7 +131,7 @@ Audit baseline dan kontrak aplikasi
 
 **Dependencies:** Task 2
 
-**Files likely touched:** `app/app.vue`, `app/pages/index.vue`, `app/components/AppShell.vue`, `app/components/Launchpad.vue`, `app/assets/css/main.css`
+**Files likely touched:** `app/app.vue`, `app/pages/index.vue`, `app/layouts/default.vue`, `app/components/Launchpad.vue`, `app/assets/css/main.css`
 
 **Estimated scope:** Medium (3-5 files)
 
@@ -427,7 +427,7 @@ Audit baseline dan kontrak aplikasi
 
 **Dependencies:** Tasks 2-4
 
-**Files likely touched:** `app/pages/login.vue`, `app/pages/admin/users.vue`, `app/pages/two-factor.vue`, `app/pages/index.vue`, `app/components/AppShell.vue`
+**Files likely touched:** `app/pages/login.vue`, `app/pages/admin/users.vue`, `app/pages/two-factor.vue`, `app/pages/index.vue`, `app/layouts/default.vue`
 
 **Estimated scope:** Medium (3-5 files)
 

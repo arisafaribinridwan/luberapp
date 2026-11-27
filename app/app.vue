@@ -27,7 +27,9 @@ useSeoMeta({
       <div class="w-full max-w-md h-screen sm:h-[92vh] bg-[#F7F8FA] sm:rounded-4xl shadow-xl flex flex-col overflow-hidden relative">
         <!-- 3. Area konten utama yang bisa di-scroll -->
         <main class="flex-1 overflow-y-auto scrollbar-none">
-          <NuxtPage />
+          <NuxtLayout>
+            <NuxtPage />
+          </NuxtLayout>
         </main>
       </div>
     </div>

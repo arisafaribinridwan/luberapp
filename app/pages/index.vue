@@ -4,6 +4,8 @@ const { ready, loggedIn } = useUserSession()
 useSeoMeta({
   title: 'Luber - Lunas Bersama'
 })
+
+definePageMeta({ layout: false })
 </script>
 
 <template>

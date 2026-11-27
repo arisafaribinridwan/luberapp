@@ -49,15 +49,22 @@ function resetFilters() {
 
 onMounted(() => fetchLogs(query()))
 useSeoMeta({ title: 'Log Aktivitas | Luber' })
+
+definePageMeta({
+  layout: {
+    name: 'default',
+    props: {
+      title: 'Log Aktivitas',
+      subtitle: 'Catatan audit append-only sistem',
+      backTo: '/',
+      backLabel: 'Kembali ke Launchpad'
+    }
+  }
+})
 </script>
 
 <template>
-  <AppShell
-    title="Log Aktivitas"
-    subtitle="Catatan audit append-only sistem"
-    back-to="/"
-    back-label="Kembali ke Launchpad"
-  >
+  <div>
     <div class="space-y-4 px-5 py-6">
       <form
         class="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs"
@@ -162,5 +169,5 @@ useSeoMeta({ title: 'Log Aktivitas | Luber' })
         </div>
       </div>
     </div>
-  </AppShell>
+  </div>
 </template>

@@ -1,14 +1,21 @@
 <script setup lang="ts">
 useSeoMeta({ title: 'Rekening Manual | Luber' })
+
+definePageMeta({
+  layout: {
+    name: 'default',
+    props: {
+      title: 'Rekening Manual',
+      subtitle: 'Pengaturan daftar rekening bank & kas',
+      backTo: '/',
+      backLabel: 'Kembali ke Launchpad'
+    }
+  }
+})
 </script>
 
 <template>
-  <AppShell
-    title="Rekening Manual"
-    subtitle="Pengaturan daftar rekening bank & kas"
-    back-to="/"
-    back-label="Kembali ke Launchpad"
-  >
+  <div>
     <div class="px-5 py-6">
       <div class="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs text-center">
         <div class="mx-auto flex size-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
@@ -36,5 +43,5 @@ useSeoMeta({ title: 'Rekening Manual | Luber' })
         </NuxtLink>
       </div>
     </div>
-  </AppShell>
+  </div>
 </template>
