@@ -213,23 +213,6 @@ const menuToneClasses = (tone: MenuItem['tone']) => ({
         <p class="m-0 mt-6 text-center text-[0.6875rem] font-semibold leading-[1.45] text-slate-400">
           LuberApp v1.0
         </p>
-
-        <p class="m-0 mt-3 text-center text-[0.5625rem] leading-[1.4] text-slate-400">
-          Photo by
-          <a
-            href="https://unsplash.com/@dotnny?utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditCopyText"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="underline underline-offset-2"
-          >Donny Jiang</a>
-          on
-          <a
-            href="https://unsplash.com/photos/low-angle-photo-of-high-rise-buildings-under-white-sky-42gFAgdIUC8?utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditCopyText"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="underline underline-offset-2"
-          >Unsplash</a>
-        </p>
       </section>
     </div>
   </main>

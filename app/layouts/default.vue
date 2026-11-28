@@ -24,8 +24,8 @@ const navItems = computed(() => {
   const items = [
     {
       to: '/',
-      label: 'Beranda',
-      icon: 'i-lucide-layout-grid',
+      label: 'Home',
+      icon: 'i-lucide-house',
       exact: true
     },
     {
@@ -40,7 +40,7 @@ const navItems = computed(() => {
     items.push({
       to: '/transactions',
       label: 'Transaksi',
-      icon: 'i-lucide-wallet',
+      icon: 'i-lucide-credit-card',
       exact: false
     })
   }
@@ -66,7 +66,7 @@ function isNavActive(item: { to: string, exact: boolean }) {
 <template>
   <div class="relative flex h-full min-h-0 flex-col bg-[#F7F8FA] text-[#0C2541]">
     <!-- Top Bar Header -->
-    <header class="sticky top-0 z-30 bg-linear-to-b from-[#2234A6] to-[#2A41CB] flex items-center justify-between border-b border-slate-200/80 bg-white/95 px-4 py-3 backdrop-blur-md">
+    <header class="sticky top-0 z-30 bg-linear-to-b from-[#2234A6] to-[#2A41CB] flex items-center justify-between border-b border-slate-200/80 bg-white/95 px-5 pt-5 py-3 backdrop-blur-md">
       <div class="flex items-center gap-3">
         <NuxtLink
           to="/"
@@ -104,10 +104,10 @@ function isNavActive(item: { to: string, exact: boolean }) {
     <!-- Bottom Navigation Bar for Mobile-First Flow -->
     <div
       v-if="!props.hideBottomNav"
-      class="pointer-events-auto absolute bottom-[calc(1.5rem_+_env(safe-area-inset-bottom))] left-1/2 z-40 -translate-x-1/2"
+      class="pointer-events-auto absolute bottom-[calc(2rem+env(safe-area-inset-bottom))] left-1/2 z-40 -translate-x-1/2"
     >
       <nav
-        class="flex items-center gap-1.5 rounded-full border border-white/15 bg-slate-950/90 p-1.5 shadow-[0_20px_50px_-12px_rgb(15_23_42/45%)] backdrop-blur-xl"
+        class="flex items-center gap-6 rounded-full border border-white/15 bg-linear-to-b from-[#2234A6] to-[#2A41CB] p-3 shadow-[0_20px_50px_-12px_rgb(15_23_42/45%)] backdrop-blur-xl"
         aria-label="Navigasi Floating"
       >
         <NuxtLink
